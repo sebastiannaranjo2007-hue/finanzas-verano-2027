@@ -1,0 +1,21 @@
+bolsa,orden,concepto,cuenta,presupuesto_usd,nota
+Préstamo,1,Inscripción y entrevista de inglés,Inscripción y entrevista de inglés,45.49,$150.000 COP a SEI
+Préstamo,2,Abono para separar el cupo,Abono para separar el cupo,363.96,$1.200.000 COP a SEI
+Préstamo,3,Saldo del programa Premium,Saldo del programa Premium,1640,Pago final a SEI
+Préstamo,4,SEVIS,SEVIS,35,Parte del pago final
+Préstamo,5,Depósito de cumplimiento,Depósito de cumplimiento,50,Se asume perdido
+Préstamo,6,Visa J-1,Visa J-1,185,Embajada de EE. UU.
+Préstamo,7,Vuelos: parte del préstamo,Vuelos,800,Los primeros US$800 de los vuelos
+Préstamo,8,Tren Chicago → Sandusky,Tren Chicago → Sandusky,60,Amtrak
+Nueva York,9,Vuelos: lo que pasa de US$800,Vuelos,344.05,"United 1.355.930 + Delta 441.153 + Avianca $509 + maleta $90, menos US$800"
+Nueva York,10,Carro al aeropuerto de Cleveland,Carro al aeropuerto de Cleveland,40,Por cotizar
+Nueva York,11,Hotel,Hotel,259,"Holiday Inn Express, 3 noches"
+Nueva York,12,Comida,Comida,200,$25 almuerzo + $25 cena por día
+Nueva York,13,Metro,Metro,35,Tope semanal OMNY
+Nueva York,14,Estatua de la Libertad,Estatua de la Libertad,30,
+Nueva York,15,AirTrain JFK,AirTrain JFK,8.5,
+Nueva York,16,iPhone,iPhone,650,Tu aporte
+Nueva York,17,Imprevistos,Imprevistos,0,Se paga del fondo
+Sueldo en Cedar Point,18,Vivienda,Vivienda,816,$84 por semana
+Sueldo en Cedar Point,19,Mercado,Mercado,223.43,$23 por semana
+Sueldo en Cedar Point,20,Almuerzo,Almuerzo,0,Invitado: lo que gastes sale del fondo
