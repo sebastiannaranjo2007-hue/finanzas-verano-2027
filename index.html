@@ -20,20 +20,36 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#resumen" aria-label="NYC, inicio">
+      <img src="favicon.svg" alt="" width="30" height="30"><span>NYC</span>
+    </a>
+    <nav class="tabs" aria-label="Secciones">
+      <a href="#resumen" data-tab="resumen">Resumen</a>
+      <a href="#ahorro" data-tab="ahorro">Ahorro</a>
+      <a href="#presupuesto" data-tab="presupuesto">Presupuesto</a>
+      <a href="#movimientos" data-tab="movimientos">Movimientos</a>
+    </nav>
+  </div>
+</header>
+
 <main class="fz">
-  <header class="fz-head" id="resumen">
-    <div class="fz-head-txt">
-      <h1 class="fz-title">NYC</h1>
-      <p class="fz-sub">Tres bolsas separadas: el préstamo para Cedar Point, tu plata para Nueva York y el sueldo en Cedar Point · los dólares se pasan a pesos a <span id="v-tasa">—</span> pesos por dólar (TRM del <span id="v-tasa-fecha">—</span>)</p>
-      <p class="fz-take">
-        Llevas <b id="v-ahorro-take">—</b> ahorrados para el viaje, el <b id="v-avance">—</b> de la meta de <b id="v-meta-take">—</b>.
-        <span id="s-ahead" hidden><span class="fz-ok">Vas adelantado frente al plan</span> por <b id="v-dif-a">—</b>.</span>
-        <span id="s-behind" hidden><span class="fz-bad">Vas atrasado frente al plan</span> por <b id="v-dif-b">—</b>.</span>
-        <span id="s-even" hidden>Vas justo en el plan.</span>
-        Del préstamo llevas usados <b id="v-deuda-take">—</b> de <b id="v-pres-papa-take">—</b>.
-      </p>
-    </div>
-    <svg class="fz-art" viewBox="0 0 160 100" role="img" aria-label="Monedas, alcancía y gráfico que sube, con edificios de Nueva York al fondo">
+  <p class="fz-error" id="error" hidden>No se pudieron cargar los datos. Si abriste el archivo directamente desde tu computador, ábrelo desde GitHub Pages o con un servidor local (lee el README).</p>
+
+  <!-- RESUMEN -->
+  <section class="view" id="v-resumen" data-view="resumen">
+    <div class="fz-head">
+      <div class="fz-head-txt">
+        <p class="eyebrow">Verano 2027 · Cedar Point y Nueva York</p>
+        <p class="fz-take">
+          Llevas <b id="v-ahorro-take">—</b> ahorrados para el viaje, el <b id="v-avance">—</b> de la meta.
+          <span id="s-ahead" hidden><span class="fz-ok">Vas adelantado</span> por <b id="v-dif-a">—</b>.</span>
+          <span id="s-behind" hidden><span class="fz-bad">Vas atrasado</span> por <b id="v-dif-b">—</b>.</span>
+          <span id="s-even" hidden>Vas justo en el plan.</span>
+        </p>
+      </div>
+      <svg class="fz-art" viewBox="0 0 160 100" role="img" aria-label="Monedas, alcancía y gráfico que sube, con edificios de Nueva York al fondo">
       <rect class="bld" x="8" y="38" width="16" height="52" rx="1.5"/><rect class="bld" x="27" y="22" width="14" height="68" rx="1.5"/><path class="bld" d="M31 22 L34 8 L37 22 Z"/><rect class="bld" x="44" y="46" width="18" height="44" rx="1.5"/>
       <rect class="bld" x="112" y="30" width="16" height="60" rx="1.5"/><rect class="bld" x="131" y="44" width="20" height="46" rx="1.5"/>
       <path class="win" d="M12 46h3M19 46h3M12 54h3M19 54h3M12 62h3M19 62h3M31 30h2M36 30h2M31 38h2M36 38h2M31 46h2M36 46h2M31 54h2M36 54h2M48 54h3M55 54h3M48 62h3M55 62h3M116 38h3M123 38h3M116 46h3M123 46h3M116 54h3M123 54h3M135 52h3M144 52h3M135 60h3M144 60h3"/>
@@ -43,71 +59,101 @@
       <circle class="coin" cx="128" cy="74" r="14"/><circle class="coin-top" cx="128" cy="74" r="10.5"/><text class="sign" x="128" y="79" text-anchor="middle">$</text>
       <line class="ground" x1="2" y1="90" x2="158" y2="90"/>
     </svg>
-  </header>
+    </div>
 
-  <p class="fz-error" id="error" hidden>No se pudieron cargar los datos. Si abriste el archivo directamente desde tu computador, ábrelo desde GitHub Pages o con un servidor local (lee el README).</p>
+    <div class="fz-tiles">
+      <a class="fz-card fz-c-mint tile-wide" href="#ahorro">
+        <span class="fz-label">Ahorrado para Nueva York</span>
+        <span class="fz-big" id="v-ahorro">—</span>
+        <span class="fz-note">Meta: <span id="v-meta">—</span> al 30 de junio de 2027</span>
+        <div class="fz-meter"><i id="m-ahorro"></i></div>
+        <span class="go">Ver ahorro →</span>
+      </a>
+      <a class="fz-card fz-c-sky" href="#ahorro">
+        <span class="fz-label">Frente al plan</span>
+        <span class="fz-big" id="v-dif">—</span>
+        <span class="fz-note">A hoy el plan era <span id="v-esperado">—</span></span>
+      </a>
+      <a class="fz-card fz-c-sun" href="#presupuesto" data-bolsa="Nueva York">
+        <span class="fz-label">Fondo imprevistos</span>
+        <span class="fz-big" id="v-fondo">—</span>
+        <span class="fz-note">De <span id="v-fondo-ini">—</span> · usado <span id="v-fondo-usado">—</span></span>
+        <div class="fz-meter"><i id="m-fondo"></i></div>
+      </a>
+      <a class="fz-card fz-c-coral" href="#presupuesto" data-bolsa="Nueva York">
+        <span class="fz-label">Viaje a Nueva York</span>
+        <span class="fz-big" id="v-gastado-nyc">—</span>
+        <span class="fz-note">gastado de <span id="v-pres-nyc">—</span></span>
+        <div class="fz-meter"><i id="m-nyc"></i></div>
+      </a>
+      <a class="fz-card fz-c-grape" href="#presupuesto" data-bolsa="Préstamo">
+        <span class="fz-label">Préstamo usado</span>
+        <span class="fz-big" id="v-deuda">—</span>
+        <span class="fz-note">de <span id="v-pres-papa">—</span> · lo que devuelves</span>
+        <div class="fz-meter"><i id="m-papa"></i></div>
+      </a>
+    </div>
 
-  <section class="fz-tiles" aria-label="Indicadores">
+    <div class="block">
+      <div class="block-head"><h2 class="fz-h2 fz-c-sky">Últimos movimientos</h2><a class="link" href="#movimientos">Ver todos →</a></div>
+      <div class="cards" id="l-recientes"></div>
+    </div>
+    <p class="fz-foot">Dólares a pesos a <span id="v-tasa">—</span> por dólar (TRM del <span id="v-tasa-fecha">—</span>).</p>
+  </section>
+
+  <!-- AHORRO -->
+  <section class="view" id="v-ahorro" data-view="ahorro" hidden>
+    <h1 class="view-title">Ahorro</h1>
     <div class="fz-card fz-c-mint">
-      <span class="fz-label">Ahorrado para Nueva York</span>
-      <span class="fz-big" id="v-ahorro">—</span>
-      <span class="fz-note">Meta: <span id="v-meta">—</span> al 30 de junio de 2027</span>
-      <div class="fz-meter"><i id="m-ahorro"></i></div>
+      <span class="fz-label">Llevas</span>
+      <span class="fz-big" id="a-ahorro">—</span>
+      <span class="fz-note"><span id="a-avance">—</span> de <span id="a-meta">—</span></span>
+      <div class="fz-meter"><i id="a-meter"></i></div>
     </div>
-    <div class="fz-card fz-c-sky">
-      <span class="fz-label">Frente al plan a hoy</span>
-      <span class="fz-big" id="v-dif">—</span>
-      <span class="fz-note">A hoy el plan era <span id="v-esperado">—</span></span>
+    <div class="block">
+      <h2 class="fz-h2 fz-c-mint">Acumulado frente al plan</h2>
+      <div class="fz-legend"><span><i class="lg-real"></i>Lo que llevas</span><span><i class="lg-plan"></i>Plan de ahorro</span></div>
+      <div class="fz-chart" id="chart"></div>
     </div>
-    <div class="fz-card fz-c-sun">
-      <span class="fz-label">Fondo para imprevistos</span>
-      <span class="fz-big" id="v-fondo">—</span>
-      <span class="fz-note">De <span id="v-fondo-ini">—</span> · usado <span id="v-fondo-usado">—</span></span>
-      <div class="fz-meter"><i id="m-fondo"></i></div>
-    </div>
-    <div class="fz-card fz-c-coral">
-      <span class="fz-label">Gastado del viaje a Nueva York</span>
-      <span class="fz-big" id="v-gastado-nyc">—</span>
-      <span class="fz-note">De <span id="v-pres-nyc">—</span> con tu plata</span>
-      <div class="fz-meter"><i id="m-nyc"></i></div>
-    </div>
-    <div class="fz-card fz-c-grape">
-      <span class="fz-label">Préstamo usado</span>
-      <span class="fz-big" id="v-deuda">—</span>
-      <span class="fz-note">De <span id="v-pres-papa">—</span> para Cedar Point · es lo que devuelves</span>
-      <div class="fz-meter"><i id="m-papa"></i></div>
+    <div class="block">
+      <h2 class="fz-h2 fz-c-sky">Metas</h2>
+      <div class="cards" id="l-hitos"></div>
     </div>
   </section>
 
-  <section class="fz-sec fz-c-mint" id="ahorro">
-    <h2 class="fz-h2">Ahorro acumulado frente al plan</h2>
-    <div class="fz-legend"><span><i class="lg-real"></i>Lo que llevas</span><span><i class="lg-plan"></i>Plan de ahorro</span></div>
-    <div class="fz-chart" id="chart"></div>
-  </section>
-
-  <section class="fz-sec fz-c-coral" id="presupuesto">
-    <h2 class="fz-h2">Presupuesto frente a lo gastado</h2>
-    <p class="fz-foot">En dólares. El préstamo es aparte: lo que cueste Cedar Point no toca tu plata. De los vuelos, los primeros US$800 van al préstamo y el resto a Nueva York. Lo que te pases en Nueva York o en el sueldo, y todo gasto de almuerzo o imprevistos, se descuenta del fondo para imprevistos.</p>
-    <div class="fz-scroll">
-      <table class="fz-table">
-        <thead><tr><th>Concepto</th><th class="num">Presupuesto</th><th class="num">Gastado</th><th class="num">Queda</th><th>Estado</th></tr></thead>
-        <tbody id="t-presupuesto"></tbody>
-      </table>
+  <!-- PRESUPUESTO -->
+  <section class="view" id="v-presupuesto" data-view="presupuesto" hidden>
+    <h1 class="view-title">Presupuesto</h1>
+    <div class="chips" id="chips-bolsa" role="tablist" aria-label="Bolsas"></div>
+    <div class="fz-card" id="bolsa-resumen">
+      <span class="fz-label" id="b-titulo">—</span>
+      <span class="fz-big" id="b-gastado">—</span>
+      <span class="fz-note">gastado de <span id="b-presupuesto">—</span> · quedan <span id="b-queda">—</span></span>
+      <div class="fz-meter"><i id="b-meter"></i></div>
+      <span class="fz-note" id="b-nota"></span>
     </div>
+    <div class="cards cols" id="l-presupuesto"></div>
   </section>
 
-  <section class="fz-sec fz-c-sky" id="movimientos">
-    <h2 class="fz-h2">Movimientos</h2>
-    <div class="fz-scroll">
-      <table class="fz-table">
-        <thead><tr><th>Fecha</th><th>Tipo</th><th>Concepto</th><th>Detalle</th><th class="num">USD</th><th class="num">Pesos</th></tr></thead>
-        <tbody id="t-movimientos"></tbody>
-      </table>
+  <!-- MOVIMIENTOS -->
+  <section class="view" id="v-movimientos" data-view="movimientos" hidden>
+    <h1 class="view-title">Movimientos</h1>
+    <div class="chips" id="chips-mov" role="tablist" aria-label="Filtrar movimientos">
+      <button type="button" class="chip" data-f="todos" aria-pressed="true">Todos</button>
+      <button type="button" class="chip" data-f="gasto" aria-pressed="false">Gastos</button>
+      <button type="button" class="chip" data-f="ahorro" aria-pressed="false">Ahorros</button>
     </div>
+    <div class="cards cols" id="l-movimientos"></div>
+    <p class="fz-tip-box">Para registrar un gasto o un ahorro, cuéntaselo a Claude en el chat, o agrega una fila a <code>data/movimientos.csv</code> en el repositorio.</p>
   </section>
-
-  <p class="fz-tip-box">Los datos viven en la carpeta <code>data/</code> del repositorio. Para registrar un gasto o un ahorro se agrega una fila a <code>data/movimientos.csv</code> y se sube el cambio. Los presupuestos salen del Excel de financiamiento.</p>
 </main>
+
+<nav class="bottomnav" aria-label="Secciones">
+  <a href="#resumen" data-tab="resumen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg><span>Resumen</span></a>
+  <a href="#ahorro" data-tab="ahorro"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18 9.5 12l3.5 3.5L20 8M15 8h5v5"/></svg><span>Ahorro</span></a>
+  <a href="#presupuesto" data-tab="presupuesto"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="6" width="17" height="13" rx="2.5"/><path d="M3.5 10h17M15 14.5h2.5"/></svg><span>Presupuesto</span></a>
+  <a href="#movimientos" data-tab="movimientos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h9"/></svg><span>Movimientos</span></a>
+</nav>
 <script src="app.js"></script>
 </body>
 </html>

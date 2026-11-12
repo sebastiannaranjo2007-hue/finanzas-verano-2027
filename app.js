@@ -100,79 +100,123 @@
     };
   }
 
+
   // ---------- dibujo ----------
   function meter(id, ratio, color) {
     const bar = $(id); if (!bar) return;
-    bar.style.width = (Math.max(0, Math.min(1, ratio)) * 100).toFixed(1) + '%';
-    bar.style.background = color || '';
+    bar.style.width = '0%';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      bar.style.width = (Math.max(0, Math.min(1, ratio)) * 100).toFixed(1) + '%';
+      bar.style.background = color || '';
+    }));
   }
+  const ORDEN = ['Nueva York', 'Préstamo', 'Sueldo en Cedar Point'];
+  const TITULO = {'Préstamo': 'Préstamo · Cedar Point', 'Nueva York': 'Tu plata · Nueva York', 'Sueldo en Cedar Point': 'Sueldo en Cedar Point'};
+  const CORTO = {'Préstamo': 'Préstamo', 'Nueva York': 'Nueva York', 'Sueldo en Cedar Point': 'Sueldo'};
+  const NOTA = {
+    'Préstamo': 'Cedar Point se paga con el préstamo: lo que cueste no toca tu plata. Lo usado es lo que devuelves.',
+    'Nueva York': 'Tu plata. De los vuelos, lo que pase de US$800 va aquí. Si te pasas en un concepto, sale del fondo para imprevistos.',
+    'Sueldo en Cedar Point': 'Gastos de vida durante el trabajo. Lo que te pases, y todo gasto de almuerzo, sale del fondo para imprevistos.'
+  };
+  const COLOR = {'Préstamo': 'var(--grape)', 'Nueva York': 'var(--coral)', 'Sueldo en Cedar Point': 'var(--sun)'};
+  const PILL = {'Te pasaste': 'bad', 'Del fondo': 'warn', 'Pagado': 'ok', 'En curso': 'ok'};
+  const TIPOS = {gasto: 'Gasto', ahorro: 'Ahorro'};
+  const state = {bolsa: 'Nueva York', filtro: 'todos', data: null};
 
   function renderResumen(t) {
     setText('v-tasa', t.tasa.toLocaleString('es-CO', {minimumFractionDigits: 2}));
     setText('v-tasa-fecha', t.fecha_tasa ? fDate(t.fecha_tasa) : '—');
-    ['v-ahorro', 'v-ahorro-take'].forEach((id) => setText(id, cop(t.ahorrado_cop)));
-    ['v-meta', 'v-meta-take'].forEach((id) => setText(id, cop(t.meta_cop)));
-    setText('v-avance', pct(t.avance));
-    setText('v-dif-a', cop(Math.abs(t.dif)));
-    setText('v-dif-b', cop(Math.abs(t.dif)));
-    $('s-ahead').hidden = !(t.dif > 0);
-    $('s-behind').hidden = !(t.dif < 0);
-    $('s-even').hidden = t.dif !== 0;
+    ['v-ahorro', 'v-ahorro-take', 'a-ahorro'].forEach((id) => setText(id, cop(t.ahorrado_cop)));
+    ['v-meta', 'a-meta'].forEach((id) => setText(id, cop(t.meta_cop)));
+    setText('v-avance', pct(t.avance)); setText('a-avance', pct(t.avance));
+    setText('v-dif-a', cop(Math.abs(t.dif))); setText('v-dif-b', cop(Math.abs(t.dif)));
+    $('s-ahead').hidden = !(t.dif > 0); $('s-behind').hidden = !(t.dif < 0); $('s-even').hidden = t.dif !== 0;
     const d = $('v-dif'); d.textContent = (t.dif > 0 ? '+' : '') + cop(t.dif); d.className = 'fz-big ' + (t.dif >= 0 ? 'pos' : 'neg');
     setText('v-esperado', cop(t.esperado));
-    setText('v-fondo', usd(t.fondo_restante));
-    setText('v-fondo-ini', usd(t.fondo_inicial));
-    setText('v-fondo-usado', usd(t.fondo_usado));
-    setText('v-gastado-nyc', usd(t.gastado_nyc));
-    setText('v-pres-nyc', usd(t.presupuesto_nyc));
-    ['v-deuda', 'v-deuda-take'].forEach((id) => setText(id, usd(t.gastado_papa)));
-    ['v-pres-papa', 'v-pres-papa-take'].forEach((id) => setText(id, usd(t.presupuesto_papa)));
-    meter('m-ahorro', t.avance);
-    meter('m-fondo', t.fondo_inicial ? t.fondo_restante / t.fondo_inicial : 0, t.fondo_restante < t.fondo_inicial * 0.25 ? 'var(--coral)' : '');
-    meter('m-nyc', t.presupuesto_nyc ? t.gastado_nyc / t.presupuesto_nyc : 0);
-    meter('m-papa', t.presupuesto_papa ? t.gastado_papa / t.presupuesto_papa : 0);
+    setText('v-fondo', usd(t.fondo_restante)); setText('v-fondo-ini', usd(t.fondo_inicial)); setText('v-fondo-usado', usd(t.fondo_usado));
+    setText('v-gastado-nyc', usd(t.gastado_nyc)); setText('v-pres-nyc', usd(t.presupuesto_nyc));
+    setText('v-deuda', usd(t.gastado_papa)); setText('v-pres-papa', usd(t.presupuesto_papa));
+  }
+  function animateMeters(view) {
+    const t = state.data && state.data.t; if (!t) return;
+    if (view === 'resumen') {
+      meter('m-ahorro', t.avance);
+      meter('m-fondo', t.fondo_inicial ? t.fondo_restante / t.fondo_inicial : 0, t.fondo_restante < t.fondo_inicial * 0.25 ? 'var(--coral)' : '');
+      meter('m-nyc', t.presupuesto_nyc ? t.gastado_nyc / t.presupuesto_nyc : 0);
+      meter('m-papa', t.presupuesto_papa ? t.gastado_papa / t.presupuesto_papa : 0);
+    }
+    if (view === 'ahorro') meter('a-meter', t.avance);
   }
 
-  const ORDEN = ['Préstamo', 'Nueva York', 'Sueldo en Cedar Point'];
-  const TITULO = {'Préstamo': 'Préstamo · Cedar Point', 'Nueva York': 'Tu plata · Nueva York', 'Sueldo en Cedar Point': 'Sueldo en Cedar Point'};
-  const COLOR = {'Préstamo': 'var(--grape)', 'Nueva York': 'var(--coral)', 'Sueldo en Cedar Point': 'var(--sun)'};
-  const PILL = {'Te pasaste': 'bad', 'Del fondo': 'warn', 'Pagado': 'ok', 'En curso': 'ok'};
+  function itemMov(m, i) {
+    const card = el('div', 'item pop'); card.style.animationDelay = Math.min(i, 10) * 30 + 'ms';
+    card.appendChild(el('div', 'it-date', fDate(m.fecha)));
+    const side = el('div', 'it-side'); side.appendChild(el('span', 'fz-pill ' + (m.tipo === 'gasto' ? 'info' : 'ok'), TIPOS[m.tipo] || m.tipo)); card.appendChild(side);
+    const tt = el('div', 'it-full it-title', m.concepto); if (m.detalle) tt.appendChild(el('span', 'it-sub', m.detalle)); card.appendChild(tt);
+    card.appendChild(el('div', 'it-amount ' + (m.tipo === 'gasto' ? 'neg' : 'pos'), (m.tipo === 'gasto' ? '−' : '+') + usd(n(m.usd))));
+    card.appendChild(el('div', 'it-cop', cop(n(m.cop))));
+    return card;
+  }
+  const ordenMov = (arr) => arr.slice().sort((a, b) => (b.fecha + String(b.id).padStart(6, '0')).localeCompare(a.fecha + String(a.id).padStart(6, '0')));
 
-  function renderPresupuesto(filas) {
-    const tb = $('t-presupuesto'); tb.replaceChildren();
-    const bolsas = [...new Set(filas.map((f) => f.bolsa))].sort((a, b) => (ORDEN.indexOf(a) + 99) % 99 - (ORDEN.indexOf(b) + 99) % 99);
-    bolsas.forEach((b) => {
-      const fs = filas.filter((f) => f.bolsa === b);
-      const hr = el('tr', 'grp'); const th = el('th'); th.colSpan = 5; th.scope = 'colgroup';
-      th.style.setProperty('--c', COLOR[b] || 'var(--mint)');
-      th.textContent = (TITULO[b] || b) + ' · ' + usd(fs.reduce((s, f) => s + f.gastado_usd, 0)) + ' de ' + usd(fs.reduce((s, f) => s + f.presupuesto_usd, 0));
-      hr.appendChild(th); tb.appendChild(hr);
-      fs.forEach((f) => {
-        const tr = el('tr');
-        const c0 = el('td', 'c-name', f.concepto); if (f.nota) c0.appendChild(el('div', 'sub', f.nota)); tr.appendChild(c0);
-        const lab = (td, t) => { td.dataset.label = t; return td; };
-        tr.appendChild(lab(el('td', 'num', usd(f.presupuesto_usd)), 'Presupuesto'));
-        tr.appendChild(lab(el('td', 'num', f.gastado_usd ? usd(f.gastado_usd) : '—'), 'Gastado'));
-        tr.appendChild(lab(el('td', 'num' + (f.restante_usd < 0 ? ' neg' : ''), usd(f.restante_usd)), 'Queda'));
-        const ce = el('td', 'c-state'); ce.appendChild(el('span', 'fz-pill ' + (PILL[f.estado] || ''), f.estado)); tr.appendChild(ce);
-        tb.appendChild(tr);
-      });
+  function renderRecientes(movimientos) {
+    const box = $('l-recientes'); box.replaceChildren();
+    const lst = ordenMov(movimientos).slice(0, 3);
+    if (!lst.length) { box.appendChild(el('div', 'empty', 'Todavía no hay movimientos.')); return; }
+    lst.forEach((m, i) => box.appendChild(itemMov(m, i)));
+  }
+
+  function renderMovimientos() {
+    const box = $('l-movimientos'); box.replaceChildren();
+    const lst = ordenMov(state.data.movimientos).filter((m) => state.filtro === 'todos' || m.tipo === state.filtro);
+    if (!lst.length) { box.appendChild(el('div', 'empty', 'No hay movimientos de este tipo todavía.')); return; }
+    lst.forEach((m, i) => box.appendChild(itemMov(m, i)));
+    document.querySelectorAll('#chips-mov .chip').forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.f === state.filtro)));
+  }
+
+  function renderHitos(plan, t) {
+    const box = $('l-hitos'); box.replaceChildren();
+    plan.slice().sort((a, b) => a.fecha.localeCompare(b.fecha)).forEach((p, i) => {
+      const meta = n(p.meta_acumulada_cop), ok = t.ahorrado_cop >= meta;
+      const card = el('div', 'item pop' + (ok ? ' done' : '')); card.style.animationDelay = i * 40 + 'ms';
+      const tt = el('div', 'it-title', p.hito); tt.appendChild(el('span', 'it-sub', 'Para el ' + fDate(p.fecha))); card.appendChild(tt);
+      const side = el('div', 'it-side'); side.appendChild(el('span', 'fz-pill ' + (ok ? 'ok' : ''), ok ? 'Cumplida' : 'Pendiente')); card.appendChild(side);
+      const s1 = el('div', 'it-stat'); s1.appendChild(el('small', null, 'Meta acumulada')); s1.appendChild(document.createTextNode(cop(meta))); card.appendChild(s1);
+      const s2 = el('div', 'it-stat ' + (ok ? 'pos' : '')); s2.appendChild(el('small', null, ok ? 'Superada por' : 'Te falta')); s2.appendChild(document.createTextNode(cop(Math.abs(meta - t.ahorrado_cop)))); card.appendChild(s2);
+      box.appendChild(card);
     });
   }
 
-  function renderMovimientos(movimientos) {
-    const tb = $('t-movimientos'); tb.replaceChildren();
-    if (!movimientos.length) { const tr = el('tr'); const c = el('td', 'empty', 'Todavía no hay movimientos.'); c.colSpan = 6; tr.appendChild(c); tb.appendChild(tr); return; }
-    const tipos = {gasto: 'Gasto', ahorro: 'Ahorro'};
-    movimientos.slice().sort((a, b) => (b.fecha + String(b.id).padStart(6, '0')).localeCompare(a.fecha + String(a.id).padStart(6, '0'))).forEach((m) => {
-      const tr = el('tr');
-      tr.appendChild(el('td', 'm-fecha', fDate(m.fecha)));
-      tr.appendChild(el('td', 'm-tipo', tipos[m.tipo] || m.tipo));
-      tr.appendChild(el('td', 'm-concepto', m.concepto));
-      tr.appendChild(el('td', 'm-detalle', m.detalle || ''));
-      tr.appendChild(el('td', 'num m-usd ' + (m.tipo === 'gasto' ? 'neg' : 'pos'), (m.tipo === 'gasto' ? '−' : '+') + usd(n(m.usd))));
-      tr.appendChild(el('td', 'num m-cop', cop(n(m.cop))));
-      tb.appendChild(tr);
+  function renderChips(filas) {
+    const box = $('chips-bolsa'); box.replaceChildren();
+    ORDEN.forEach((b) => {
+      const fs = filas.filter((f) => f.bolsa === b); if (!fs.length) return;
+      const c = el('button', 'chip'); c.type = 'button'; c.style.setProperty('--c', COLOR[b]);
+      c.setAttribute('aria-pressed', String(b === state.bolsa));
+      c.appendChild(document.createTextNode(CORTO[b]));
+      c.appendChild(el('small', null, usd(fs.reduce((s, f) => s + f.presupuesto_usd, 0))));
+      c.addEventListener('click', () => { state.bolsa = b; renderBolsa(); });
+      box.appendChild(c);
+    });
+  }
+
+  function renderBolsa() {
+    const filas = state.data.filas, b = state.bolsa;
+    renderChips(filas);
+    const fs = filas.filter((f) => f.bolsa === b);
+    const pres = fs.reduce((s, f) => s + f.presupuesto_usd, 0), gas = fs.reduce((s, f) => s + f.gastado_usd, 0);
+    const card = $('bolsa-resumen'); card.style.setProperty('--c', COLOR[b]);
+    setText('b-titulo', TITULO[b]); setText('b-gastado', usd(gas)); setText('b-presupuesto', usd(pres)); setText('b-queda', usd(pres - gas)); setText('b-nota', NOTA[b] || '');
+    meter('b-meter', pres ? gas / pres : 0);
+    const box = $('l-presupuesto'); box.replaceChildren();
+    fs.forEach((f, i) => {
+      const it = el('div', 'item pop'); it.style.animationDelay = Math.min(i, 12) * 30 + 'ms';
+      const tt = el('div', 'it-title', f.concepto); if (f.nota) tt.appendChild(el('span', 'it-sub', f.nota)); it.appendChild(tt);
+      const side = el('div', 'it-side'); side.appendChild(el('span', 'fz-pill ' + (PILL[f.estado] || ''), f.estado)); it.appendChild(side);
+      [['Presupuesto', usd(f.presupuesto_usd), ''], ['Gastado', f.gastado_usd ? usd(f.gastado_usd) : '—', ''], ['Queda', usd(f.restante_usd), f.restante_usd < 0 ? 'neg' : '']].forEach(([l, v, cls]) => {
+        const s = el('div', 'it-stat ' + cls); s.appendChild(el('small', null, l)); s.appendChild(document.createTextNode(v)); it.appendChild(s);
+      });
+      box.appendChild(it);
     });
   }
 
@@ -242,15 +286,41 @@
     });
   }
 
+  // ---------- navegación ----------
+  const VIEWS = ['resumen', 'ahorro', 'presupuesto', 'movimientos'];
+  function show(view, first) {
+    if (!VIEWS.includes(view)) view = 'resumen';
+    document.querySelectorAll('.view').forEach((v) => {
+      const on = v.dataset.view === view;
+      v.hidden = !on;
+      v.classList.toggle('enter', on && !first);
+    });
+    document.querySelectorAll('[data-tab]').forEach((a) => { if (a.dataset.tab === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    if (!first) window.scrollTo({top: 0, behavior: 'instant' in window ? 'instant' : 'auto'});
+    if (state.data) {
+      if (view === 'ahorro') renderChart(state.data.serie, state.data.plan);
+      animateMeters(view);
+    }
+  }
+  const current = () => (location.hash || '#resumen').slice(1);
+  window.addEventListener('hashchange', () => show(current()));
+  document.querySelectorAll('a[data-bolsa]').forEach((a) => a.addEventListener('click', () => { state.bolsa = a.dataset.bolsa; if (state.data) renderBolsa(); }));
+  document.querySelectorAll('#chips-mov .chip').forEach((c) => c.addEventListener('click', () => { state.filtro = c.dataset.f; renderMovimientos(); }));
+  show(current(), true);
+
   // ---------- arranque ----------
   Promise.all(['presupuesto', 'movimientos', 'plan', 'parametros'].map(load)).then(([presupuesto, movimientos, plan, parametros]) => {
     const filas = porConcepto(presupuesto, movimientos);
     const serie = serieAhorro(movimientos);
-    renderResumen(totales(filas, movimientos, plan, parametros));
-    renderPresupuesto(filas);
-    renderMovimientos(movimientos);
-    renderChart(serie, plan);
-    let w = $('chart').clientWidth;
-    window.addEventListener('resize', () => { const nw = $('chart').clientWidth; if (nw !== w) { w = nw; renderChart(serie, plan); } });
+    const t = totales(filas, movimientos, plan, parametros);
+    state.data = {filas, serie, plan, movimientos, t};
+    renderResumen(t);
+    renderRecientes(movimientos);
+    renderHitos(plan, t);
+    renderBolsa();
+    renderMovimientos();
+    show(current(), true);
+    let w = 0;
+    window.addEventListener('resize', () => { const c = $('chart'); if (!c || c.offsetParent === null) return; if (c.clientWidth !== w) { w = c.clientWidth; renderChart(serie, plan); } });
   }).catch((err) => { console.error(err); $('error').hidden = false; });
 })();
