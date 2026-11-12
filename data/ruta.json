@@ -1,0 +1,475 @@
+{
+ "fechas": "Miércoles 4 al sábado 7 de agosto de 2027",
+ "hotel": "Holiday Inn Express Times Square South, 60 W 36th St",
+ "dias": [
+  {
+   "dia": "Mié",
+   "num": 4,
+   "nombre": "Miércoles 4 de agosto",
+   "titulo": "Llegada y Midtown",
+   "paradas": [
+    {
+     "hora": "07:45",
+     "lugar": "Aeropuerto LaGuardia (LGA)",
+     "nota": "Llegas en el vuelo de las 6 a. m. desde Cleveland. Confirma en tu itinerario que aterriza en LaGuardia y en qué terminal.",
+     "coord": [
+      40.7769,
+      -73.874
+     ]
+    },
+    {
+     "hora": "09:00",
+     "lugar": "Holiday Inn Express: guardar equipaje",
+     "nota": "Holiday Inn Express Times Square South (60 W 36th St, entre la Quinta y la Sexta Avenida). Desde LGA: taxi o app (30–45 min según tráfico) o el bus gratuito Q70 hasta Jackson Heights y de ahí el metro. Deja la maleta guardada: el check-in es desde las 4 p. m.",
+     "modo": "car",
+     "coord": [
+      40.7501,
+      -73.9862
+     ]
+    },
+    {
+     "hora": "10:15",
+     "lugar": "Caminata por la Quinta Avenida hasta Apple",
+     "nota": "Sales del hotel hacia las 9:30 y subes por la Quinta Avenida, unos 2 km (40 minutos con calma), viendo las tiendas grandes. Pasas por la Biblioteca y el Rockefeller Center, pero esos los visitas con calma en la tarde. Llegas a Apple Fifth Avenue, el cubo de vidrio frente a la Plaza GM, y te quedas al menos una hora.",
+     "modo": "walk",
+     "coord": [
+      40.7637,
+      -73.9729
+     ]
+    },
+    {
+     "hora": "11:30",
+     "lugar": "Paseo corto por Central Park",
+     "nota": "Desde Apple cruzas la calle y entras al parque: The Pond y el puente Gapstow, y sigues hasta Sheep Meadow, la pradera grande para descansar un rato en el pasto. El recorrido largo del parque queda para el viernes.",
+     "modo": "walk",
+     "coord": [
+      40.7718,
+      -73.975
+     ]
+    },
+    {
+     "hora": "12:30",
+     "lugar": "Almuerzo",
+     "nota": "Hora de almuerzo, por la zona sur de Central Park o de bajada por Midtown.",
+     "comida": true
+    },
+    {
+     "hora": "14:00",
+     "lugar": "Rockefeller Center y Catedral de San Patricio",
+     "nota": "Bajas caminando desde el parque hasta la calle 50: la catedral queda enfrente de los Channel Gardens del Rockefeller Center. Opcional: subir a Top of the Rock (se paga aparte).",
+     "modo": "walk",
+     "coord": [
+      40.7587,
+      -73.9787
+     ]
+    },
+    {
+     "hora": "15:00",
+     "lugar": "Grand Central",
+     "nota": "Mira el salón principal y el techo estrellado.",
+     "modo": "walk",
+     "coord": [
+      40.7527,
+      -73.9772
+     ]
+    },
+    {
+     "hora": "15:30",
+     "lugar": "Biblioteca Pública y Bryant Park",
+     "nota": "La biblioteca es gratis. Bryant Park, justo detrás, es buen lugar para sentarse mientras se hace la hora del check-in.",
+     "modo": "walk",
+     "coord": [
+      40.7532,
+      -73.9822
+     ]
+    },
+    {
+     "hora": "16:00",
+     "lugar": "Holiday Inn Express: check-in",
+     "nota": "El check-in es desde las 4 p. m. Descansa: madrugaste para el vuelo. Carga el celular antes de la noche.",
+     "modo": "walk",
+     "coord": [
+      40.7501,
+      -73.9862
+     ]
+    },
+    {
+     "hora": "19:00",
+     "lugar": "Cena",
+     "nota": "Hora de cena. Koreatown (calle 32) queda a dos cuadras del hotel y del Empire State.",
+     "comida": true
+    },
+    {
+     "hora": "20:00",
+     "lugar": "Empire State, solo por fuera",
+     "nota": "Sin entrada: míralo desde la calle 34 y la Quinta Avenida, ya con las luces encendidas.",
+     "modo": "walk",
+     "coord": [
+      40.7484,
+      -73.9857
+     ]
+    },
+    {
+     "hora": "21:00",
+     "lugar": "Times Square",
+     "nota": "Cierre del día. A esta hora ya está todo iluminado. Cuida el celular y el pasaporte; el hotel queda a unos 10 minutos a pie.",
+     "modo": "walk",
+     "coord": [
+      40.758,
+      -73.9855
+     ]
+    }
+   ],
+   "corto": "Llegada"
+  },
+  {
+   "dia": "Jue",
+   "num": 5,
+   "nombre": "Jueves 5 de agosto",
+   "titulo": "Bajo Manhattan y Brooklyn",
+   "paradas": [
+    {
+     "hora": "07:30",
+     "lugar": "Holiday Inn Express: desayuno",
+     "nota": "Desayuno incluido en el hotel. Sal temprano: el ferry parte de Battery Park y los cupos de la mañana se agotan primero.",
+     "coord": [
+      40.7501,
+      -73.9862
+     ]
+    },
+    {
+     "hora": "08:30",
+     "lugar": "Battery Park",
+     "nota": "Aquí se toma el ferry a la Estatua de la Libertad. Reserva el horario con anticipación.",
+     "modo": "metro",
+     "coord": [
+      40.7032,
+      -74.015
+     ]
+    },
+    {
+     "hora": "09:30",
+     "lugar": "Estatua de la Libertad",
+     "nota": "La corona y el pedestal se reservan aparte. Revisa en la web oficial qué puedes llevar.",
+     "modo": "ferry",
+     "coord": [
+      40.6892,
+      -74.0445
+     ]
+    },
+    {
+     "hora": "12:00",
+     "lugar": "Wall Street, el Toro y Trinity Church",
+     "nota": "Regresas en el ferry a Battery Park y caminas hacia Wall Street.",
+     "modo": "ferry",
+     "coord": [
+      40.7068,
+      -74.0127
+     ]
+    },
+    {
+     "hora": "12:45",
+     "lugar": "Almuerzo",
+     "nota": "Hora de almuerzo, por el Distrito Financiero.",
+     "comida": true
+    },
+    {
+     "hora": "14:00",
+     "lugar": "Memorial del 11-S y Oculus",
+     "nota": "Las piscinas del memorial son gratis. El museo se paga aparte.",
+     "modo": "walk",
+     "coord": [
+      40.7114,
+      -74.0122
+     ]
+    },
+    {
+     "hora": "15:30",
+     "lugar": "Puente de Brooklyn: entrada",
+     "nota": "Entra por el lado de City Hall. Cruzarlo a pie toma entre 30 y 40 minutos.",
+     "modo": "walk",
+     "coord": [
+      40.7127,
+      -74.0041
+     ]
+    },
+    {
+     "hora": "17:00",
+     "lugar": "DUMBO",
+     "nota": "Terminas el cruce en Brooklyn y bajas a DUMBO. La foto clásica es en Washington Street con el puente de Manhattan de fondo.",
+     "modo": "walk",
+     "coord": [
+      40.704,
+      -73.9885
+     ]
+    },
+    {
+     "hora": "18:30",
+     "lugar": "Cena",
+     "nota": "Hora de cena, en DUMBO.",
+     "comida": true
+    },
+    {
+     "hora": "19:45",
+     "lugar": "Brooklyn Bridge Park, Pier 1",
+     "nota": "Atardecer con Manhattan de frente (en agosto el sol se pone hacia las 8 p. m.).",
+     "modo": "walk",
+     "coord": [
+      40.7018,
+      -73.996
+     ]
+    },
+    {
+     "hora": "21:00",
+     "lugar": "Regreso al hotel",
+     "nota": "Metro de vuelta a Midtown. Cierre del día.",
+     "modo": "metro",
+     "coord": [
+      40.7501,
+      -73.9862
+     ]
+    }
+   ],
+   "corto": "Bajo Manhattan"
+  },
+  {
+   "dia": "Vie",
+   "num": 6,
+   "nombre": "Viernes 6 de agosto",
+   "titulo": "Central Park y Macy's",
+   "paradas": [
+    {
+     "hora": "08:00",
+     "lugar": "Holiday Inn Express: desayuno",
+     "nota": "Desayuno incluido en el hotel. Hoy toca recorrer Central Park con calma, de sur a norte y de vuelta por el oeste. Lleva agua y zapatos cómodos: son unos 6–7 km caminando.",
+     "coord": [
+      40.7501,
+      -73.9862
+     ]
+    },
+    {
+     "hora": "09:00",
+     "lugar": "Entrada por la calle 59",
+     "nota": "Metro hasta la Quinta Avenida con calle 59. The Pond ya lo viste el miércoles, así que entra y sigue directo hacia The Mall.",
+     "modo": "metro",
+     "coord": [
+      40.766,
+      -73.9737
+     ]
+    },
+    {
+     "hora": "09:30",
+     "lugar": "The Mall, Bethesda Terrace y Bow Bridge",
+     "nota": "Camina The Mall, la avenida de olmos, hasta la fuente de Bethesda. Bow Bridge queda a pocos pasos, sobre el lago.",
+     "modo": "walk",
+     "coord": [
+      40.774,
+      -73.9712
+     ]
+    },
+    {
+     "hora": "10:30",
+     "lugar": "The Ramble y Castillo Belvedere",
+     "nota": "Cruza el bosque de The Ramble hasta el castillo, que tiene un mirador sobre el parque.",
+     "modo": "walk",
+     "coord": [
+      40.7794,
+      -73.969
+     ]
+    },
+    {
+     "hora": "11:15",
+     "lugar": "Great Lawn y el Reservoir",
+     "nota": "Pasa por la Great Lawn y camina por el borde sur del Reservoir: buena vista del skyline.",
+     "modo": "walk",
+     "coord": [
+      40.7835,
+      -73.9626
+     ]
+    },
+    {
+     "hora": "12:30",
+     "lugar": "Almuerzo",
+     "nota": "Hora de almuerzo, en el parque o en el Upper West Side.",
+     "comida": true
+    },
+    {
+     "hora": "13:30",
+     "lugar": "Strawberry Fields",
+     "nota": "Bajas por el lado oeste del parque hasta el mosaico de Imagine.",
+     "modo": "walk",
+     "coord": [
+      40.7757,
+      -73.9752
+     ]
+    },
+    {
+     "hora": "14:30",
+     "lugar": "Columbus Circle",
+     "nota": "Sales del parque por la esquina suroeste. Desde aquí tomas el metro.",
+     "modo": "walk",
+     "coord": [
+      40.7681,
+      -73.9819
+     ]
+    },
+    {
+     "hora": "15:30",
+     "lugar": "Holiday Inn Express: descanso",
+     "nota": "Metro de vuelta al hotel. Descansa después de toda la caminata por el parque.",
+     "modo": "metro",
+     "coord": [
+      40.7501,
+      -73.9862
+     ]
+    },
+    {
+     "hora": "18:00",
+     "lugar": "Cena",
+     "nota": "Hora de cena, cerca del hotel.",
+     "comida": true
+    },
+    {
+     "hora": "19:00",
+     "lugar": "Macy's Herald Square: compras",
+     "nota": "Último plan del día, sin afán. Macy's ocupa toda una manzana y queda a dos cuadras del hotel. Confirma el horario de cierre ese viernes. Pregunta en servicio al cliente por el descuento para visitantes extranjeros (llevando el pasaporte).",
+     "modo": "walk",
+     "coord": [
+      40.7508,
+      -73.989
+     ]
+    },
+    {
+     "hora": "21:00",
+     "lugar": "Holiday Inn Express",
+     "nota": "Cierre del día. Deja las compras y empaca: mañana es el check-out.",
+     "modo": "walk",
+     "coord": [
+      40.7501,
+      -73.9862
+     ]
+    }
+   ],
+   "corto": "Central Park"
+  },
+  {
+   "dia": "Sáb",
+   "num": 7,
+   "nombre": "Sábado 7 de agosto",
+   "titulo": "Vessel, High Line completo y barrios",
+   "paradas": [
+    {
+     "hora": "08:30",
+     "lugar": "Holiday Inn Express: desayuno y check-out",
+     "nota": "Desayuno incluido. Haz el check-out y deja la maleta guardada en el hotel hasta la noche (confirma con el hotel que lo permiten).",
+     "coord": [
+      40.7501,
+      -73.9862
+     ]
+    },
+    {
+     "hora": "09:30",
+     "lugar": "Hudson Yards y el Vessel",
+     "nota": "Metro línea 7 hasta 34 St–Hudson Yards. Subir al Vessel tiene costo y se reserva por horario: revisa en la web oficial.",
+     "modo": "metro",
+     "coord": [
+      40.7538,
+      -74.0022
+     ]
+    },
+    {
+     "hora": "10:15",
+     "lugar": "High Line completo, de norte a sur",
+     "nota": "Recorres todo el High Line, desde Hudson Yards hasta la calle Gansevoort: unos 2,3 km por encima de Chelsea, con jardines, el Spur y vistas al río Hudson. Tómalo con calma, 1 a 1,5 horas.",
+     "modo": "walk",
+     "coord": [
+      40.7399,
+      -74.008
+     ]
+    },
+    {
+     "hora": "11:45",
+     "lugar": "Little Island y Whitney (por fuera)",
+     "nota": "Al bajar del High Line, el Whitney queda al lado y Little Island, el parque sobre el río, a una cuadra. Entrar a Little Island es gratis.",
+     "modo": "walk",
+     "coord": [
+      40.742,
+      -74.0102
+     ]
+    },
+    {
+     "hora": "12:30",
+     "lugar": "Almuerzo en Chelsea Market",
+     "nota": "Hora de almuerzo: el mercado tiene muchos puestos para escoger.",
+     "modo": "walk",
+     "coord": [
+      40.7424,
+      -74.0061
+     ]
+    },
+    {
+     "hora": "14:00",
+     "lugar": "Greenwich Village y Washington Square Park",
+     "nota": "Calles de ladrillo, cafés y el arco del parque.",
+     "modo": "walk",
+     "coord": [
+      40.7308,
+      -73.9973
+     ]
+    },
+    {
+     "hora": "15:30",
+     "lugar": "SoHo",
+     "nota": "Calles con fachadas de hierro fundido y tiendas.",
+     "modo": "walk",
+     "coord": [
+      40.7245,
+      -73.9985
+     ]
+    },
+    {
+     "hora": "16:30",
+     "lugar": "Little Italy y Chinatown",
+     "nota": "Dos barrios pegados, buenos para caminar.",
+     "modo": "walk",
+     "coord": [
+      40.7185,
+      -73.9975
+     ]
+    },
+    {
+     "hora": "17:30",
+     "lugar": "Union Square",
+     "nota": "Último paseo antes de la cena.",
+     "modo": "walk",
+     "coord": [
+      40.7359,
+      -73.9903
+     ]
+    },
+    {
+     "hora": "19:00",
+     "lugar": "Cena",
+     "nota": "Última cena en Nueva York, por Union Square o ya cerca del hotel.",
+     "comida": true
+    },
+    {
+     "hora": "20:30",
+     "lugar": "Holiday Inn Express: recoger maleta",
+     "nota": "Recoge la maleta y alístate para salir.",
+     "modo": "metro",
+     "coord": [
+      40.7501,
+      -73.9862
+     ]
+    },
+    {
+     "hora": "21:30",
+     "lugar": "Salida al aeropuerto",
+     "nota": "Sales a más tardar a las 9:30 p. m. El vuelo a Bogotá es el domingo 8 a la 1:30 a. m. y conviene estar en el aeropuerto unas 3 horas antes. Si sale de JFK, calcula entre 1 y 1,5 horas desde Manhattan. El aeropuerto no aparece en el mapa."
+    }
+   ],
+   "corto": "High Line"
+  }
+ ]
+}

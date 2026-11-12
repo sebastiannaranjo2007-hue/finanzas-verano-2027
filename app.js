@@ -286,8 +286,56 @@
     });
   }
 
+  // ---------- ruta ----------
+  const MODOS = {walk: ['A pie', 'walking'], metro: ['Metro', 'transit'], ferry: ['Ferry', 'transit'], car: ['Taxi o bus', 'driving']};
+  const ruta = {data: null, dia: 0};
+  const maps = (c) => 'https://www.google.com/maps/search/?api=1&query=' + c[0] + ',' + c[1];
+  const dir = (a, b, m) => 'https://www.google.com/maps/dir/?api=1&origin=' + a[0] + ',' + a[1] + '&destination=' + b[0] + ',' + b[1] + '&travelmode=' + m;
+  function renderRuta() {
+    const R = ruta.data; if (!R) return;
+    setText('r-fechas', R.fechas); setText('r-hotel', R.hotel);
+    const chips = $('chips-dia'); chips.replaceChildren();
+    R.dias.forEach((d, i) => {
+      const c = el('button', 'chip'); c.type = 'button'; c.style.setProperty('--c', 'var(--coral)');
+      c.setAttribute('aria-pressed', String(i === ruta.dia));
+      c.appendChild(document.createTextNode(d.dia + ' ' + d.num)); c.appendChild(el('small', null, d.corto || ''));
+      c.addEventListener('click', () => { ruta.dia = i; renderRuta(); });
+      chips.appendChild(c);
+    });
+    const d = R.dias[ruta.dia];
+    setText('d-nombre', d.nombre); setText('d-titulo', d.titulo);
+    const lugares = d.paradas.filter((p) => !p.comida).length;
+    setText('d-resumen', lugares + ' paradas · de ' + d.paradas[0].hora + ' a ' + d.paradas[d.paradas.length - 1].hora);
+    const ol = $('l-ruta'); ol.replaceChildren();
+    let prev = null;
+    d.paradas.forEach((p, i) => {
+      const li = el('li', 'stop pop' + (p.comida ? ' meal' : '')); li.style.animationDelay = Math.min(i, 12) * 35 + 'ms';
+      li.appendChild(el('div', 'stop-time', p.hora));
+      const rail = el('div', 'stop-rail'); rail.appendChild(el('span', 'stop-dot')); li.appendChild(rail);
+      const body = el('div', 'stop-body');
+      body.appendChild(el('div', 'stop-name', p.lugar));
+      if (p.modo && MODOS[p.modo]) body.appendChild(el('span', 'mode', MODOS[p.modo][0]));
+      if (p.nota) body.appendChild(el('div', 'stop-note', p.nota));
+      if (p.coord) {
+        const links = el('div', 'stop-links');
+        const a1 = el('a', null, 'Ver en mapa'); a1.href = maps(p.coord); a1.target = '_blank'; a1.rel = 'noopener'; links.appendChild(a1);
+        if (prev && p.modo && MODOS[p.modo]) { const a2 = el('a', 'dir', 'Cómo llegar'); a2.href = dir(prev, p.coord, MODOS[p.modo][1]); a2.target = '_blank'; a2.rel = 'noopener'; links.appendChild(a2); }
+        body.appendChild(links);
+        prev = p.coord;
+      }
+      li.appendChild(body); ol.appendChild(li);
+    });
+  }
+  fetch('data/ruta.json', {cache: 'no-store'}).then((r) => r.ok ? r.json() : Promise.reject(r.status)).then((R) => {
+    ruta.data = R;
+    const hoy = new Date(); const iso = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0');
+    const idx = {'2027-08-04': 0, '2027-08-05': 1, '2027-08-06': 2, '2027-08-07': 3}[iso];
+    if (idx != null && idx < R.dias.length) ruta.dia = idx;
+    renderRuta();
+  }).catch((e) => console.error('ruta', e));
+
   // ---------- navegación ----------
-  const VIEWS = ['resumen', 'ahorro', 'presupuesto', 'movimientos'];
+  const VIEWS = ['resumen', 'ahorro', 'presupuesto', 'ruta', 'movimientos'];
   function show(view, first) {
     if (!VIEWS.includes(view)) view = 'resumen';
     document.querySelectorAll('.view').forEach((v) => {
@@ -295,7 +343,8 @@
       v.hidden = !on;
       v.classList.toggle('enter', on && !first);
     });
-    document.querySelectorAll('[data-tab]').forEach((a) => { if (a.dataset.tab === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    const tab = view === 'movimientos' ? 'resumen' : view;
+    document.querySelectorAll('[data-tab]').forEach((a) => { if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     if (!first) window.scrollTo({top: 0, behavior: 'instant' in window ? 'instant' : 'auto'});
     if (state.data) {
       if (view === 'ahorro') renderChart(state.data.serie, state.data.plan);

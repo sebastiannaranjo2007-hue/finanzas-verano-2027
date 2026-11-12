@@ -4,7 +4,7 @@ App web sencilla para seguir el ahorro, el presupuesto y los gastos del verano 2
 
 ## Qué muestra
 
-Cuatro secciones, con pestañas arriba en el computador y una barra abajo en el celular: **Resumen**, **Ahorro**, **Presupuesto** (una bolsa a la vez) y **Movimientos** (con filtro de gastos y ahorros). Cada sección tiene su link: `#resumen`, `#ahorro`, `#presupuesto`, `#movimientos`.
+Cuatro secciones, con pestañas arriba en el computador y una barra abajo en el celular: **Resumen**, **Ahorro**, **Presupuesto** (una bolsa a la vez) y **Ruta NYC** (el plan día por día del 4 al 7 de agosto, con links a Google Maps). Los **Movimientos** se abren desde el Resumen con "Ver todos". Cada sección tiene su link: `#resumen`, `#ahorro`, `#presupuesto`, `#ruta`, `#movimientos`.
 
 - **Ahorro para Nueva York** frente a la meta y frente al plan a la fecha de hoy.
 - **Fondo para imprevistos**: ahorro planeado + almuerzos invitados − presupuesto de Nueva York, menos lo que te pases.
@@ -26,6 +26,7 @@ data/
   presupuesto.csv   presupuesto por concepto y bolsa
   plan.csv          metas de ahorro acumulado
   parametros.csv    tasa de cambio del día y ahorro por almuerzos invitados
+  ruta.json         plan de los días en Nueva York
 .nojekyll           le dice a GitHub Pages que publique los archivos tal cual
 ```
 
