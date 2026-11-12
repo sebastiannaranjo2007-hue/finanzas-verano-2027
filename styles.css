@@ -239,7 +239,7 @@ html.locked .lock {
   display: grid; place-items: center; position: fixed; inset: 0; z-index: 100; padding: max(20px, env(safe-area-inset-top, 0px)) 16px max(20px, env(safe-area-inset-bottom, 0px));
   background: linear-gradient(160deg, color-mix(in srgb, var(--sky) 22%, var(--bg)), color-mix(in srgb, var(--sun) 16%, var(--bg)) 55%, color-mix(in srgb, var(--coral) 16%, var(--bg)));
 }
-html.locked body > :not(.lock) { visibility: hidden; }
+html.locked body > :not(.lock) { display: none !important; }
 html.locked body { overflow: hidden; }
 .lock-card { display: grid; justify-items: center; gap: 6px; width: min(320px, 100%); }
 .lock-card img { border-radius: 16px; box-shadow: 0 10px 30px -12px rgb(0 0 0 / .4); }
