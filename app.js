@@ -149,11 +149,12 @@
       hr.appendChild(th); tb.appendChild(hr);
       fs.forEach((f) => {
         const tr = el('tr');
-        const c0 = el('td', null, f.concepto); if (f.nota) c0.appendChild(el('div', 'sub', f.nota)); tr.appendChild(c0);
-        tr.appendChild(el('td', 'num', usd(f.presupuesto_usd)));
-        tr.appendChild(el('td', 'num', f.gastado_usd ? usd(f.gastado_usd) : '—'));
-        tr.appendChild(el('td', 'num' + (f.restante_usd < 0 ? ' neg' : ''), usd(f.restante_usd)));
-        const ce = el('td'); ce.appendChild(el('span', 'fz-pill ' + (PILL[f.estado] || ''), f.estado)); tr.appendChild(ce);
+        const c0 = el('td', 'c-name', f.concepto); if (f.nota) c0.appendChild(el('div', 'sub', f.nota)); tr.appendChild(c0);
+        const lab = (td, t) => { td.dataset.label = t; return td; };
+        tr.appendChild(lab(el('td', 'num', usd(f.presupuesto_usd)), 'Presupuesto'));
+        tr.appendChild(lab(el('td', 'num', f.gastado_usd ? usd(f.gastado_usd) : '—'), 'Gastado'));
+        tr.appendChild(lab(el('td', 'num' + (f.restante_usd < 0 ? ' neg' : ''), usd(f.restante_usd)), 'Queda'));
+        const ce = el('td', 'c-state'); ce.appendChild(el('span', 'fz-pill ' + (PILL[f.estado] || ''), f.estado)); tr.appendChild(ce);
         tb.appendChild(tr);
       });
     });
@@ -165,12 +166,12 @@
     const tipos = {gasto: 'Gasto', ahorro: 'Ahorro'};
     movimientos.slice().sort((a, b) => (b.fecha + String(b.id).padStart(6, '0')).localeCompare(a.fecha + String(a.id).padStart(6, '0'))).forEach((m) => {
       const tr = el('tr');
-      tr.appendChild(el('td', null, fDate(m.fecha)));
-      tr.appendChild(el('td', null, tipos[m.tipo] || m.tipo));
-      tr.appendChild(el('td', null, m.concepto));
-      tr.appendChild(el('td', null, m.detalle || ''));
-      tr.appendChild(el('td', 'num ' + (m.tipo === 'gasto' ? 'neg' : 'pos'), usd(n(m.usd))));
-      tr.appendChild(el('td', 'num', cop(n(m.cop))));
+      tr.appendChild(el('td', 'm-fecha', fDate(m.fecha)));
+      tr.appendChild(el('td', 'm-tipo', tipos[m.tipo] || m.tipo));
+      tr.appendChild(el('td', 'm-concepto', m.concepto));
+      tr.appendChild(el('td', 'm-detalle', m.detalle || ''));
+      tr.appendChild(el('td', 'num m-usd ' + (m.tipo === 'gasto' ? 'neg' : 'pos'), (m.tipo === 'gasto' ? '−' : '+') + usd(n(m.usd))));
+      tr.appendChild(el('td', 'num m-cop', cop(n(m.cop))));
       tb.appendChild(tr);
     });
   }
