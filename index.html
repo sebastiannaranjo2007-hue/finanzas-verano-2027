@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es-CO">
+<html lang="es-CO" class="locked">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -18,8 +18,24 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Inter:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="styles.css">
+<script src="lock.js"></script>
 </head>
 <body>
+<div class="lock" id="lock" role="dialog" aria-modal="true" aria-labelledby="lock-title">
+  <div class="lock-card">
+    <img src="favicon.svg" alt="" width="64" height="64">
+    <h1 id="lock-title">NYC</h1>
+    <p class="lock-sub">Escribe tu clave</p>
+    <div class="pin-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <p class="pin-msg" role="status" aria-live="polite"></p>
+    <div class="keypad">
+      <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+      <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+      <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+      <span></span><button type="button" data-k="0">0</button><button type="button" data-k="del" aria-label="Borrar">⌫</button>
+    </div>
+  </div>
+</div>
 <header class="topbar">
   <div class="topbar-in">
     <a class="brand" href="#resumen" aria-label="NYC, inicio">

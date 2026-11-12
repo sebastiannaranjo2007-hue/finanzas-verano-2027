@@ -54,6 +54,8 @@ Para cambiar la tasa, edita `data/parametros.csv`.
 3. En el repositorio: **Settings → Pages → Build and deployment → Source: Deploy from a branch**, rama `main`, carpeta `/ (root)` → **Save**.
 4. En uno o dos minutos la página queda en `https://TU-USUARIO.github.io/finanzas-verano-2027/`.
 
+**Clave de entrada:** la página pide una clave de 4 dígitos y la recuerda 30 días en cada dispositivo. Es un candado para la vista, no seguridad real: el repositorio es público y cualquiera puede leer los archivos de `data/` directamente en GitHub.
+
 **Ojo con la privacidad:** con una cuenta gratis, GitHub Pages solo publica repositorios públicos, así que cualquiera con el link (o que encuentre el repositorio) puede ver las cifras. La página le pide a los buscadores que no la indexen, pero eso no la hace privada.
 
 ## Verla en tu computador
