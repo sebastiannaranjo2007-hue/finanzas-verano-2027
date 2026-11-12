@@ -39,12 +39,16 @@ code { font-size: .9em; background: color-mix(in srgb, var(--grape) 14%, transpa
 .fz-take b { font-variant-numeric: tabular-nums; padding: 0 4px; border-radius: 6px; background: color-mix(in srgb, var(--sun) 24%, transparent); }
 .fz-ok { color: var(--mint); font-weight: 600; }
 .fz-bad { color: var(--coral); font-weight: 600; }
-.fz-art { width: 150px; height: auto; }
-.fz-art .trk { fill: none; stroke: var(--coral); stroke-width: 3; stroke-linecap: round; }
-.fz-art .sup { stroke: color-mix(in srgb, var(--coral) 55%, transparent); stroke-width: 1.5; }
-.fz-art .bld { fill: color-mix(in srgb, var(--sky) 70%, var(--panel)); }
-.fz-art .sun { fill: var(--sun); }
-@media (max-width: 520px) { .fz-head { grid-template-columns: 1fr; } .fz-art { width: 110px; justify-self: end; order: -1; } }
+.fz-art { width: 170px; height: auto; }
+.fz-art .bld { fill: color-mix(in srgb, var(--sky) 45%, var(--panel)); }
+.fz-art .win { stroke: color-mix(in srgb, var(--panel) 70%, var(--sun)); stroke-width: 2; stroke-linecap: round; }
+.fz-art .bar { fill: var(--mint); }
+.fz-art .arrow { fill: none; stroke: var(--coral); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+.fz-art .coin { fill: color-mix(in srgb, var(--sun) 80%, #000); }
+.fz-art .coin-top { fill: var(--sun); }
+.fz-art .sign { fill: color-mix(in srgb, var(--sun) 45%, #000); font: 700 15px var(--f-display); }
+.fz-art .ground { stroke: color-mix(in srgb, var(--fg) 25%, transparent); stroke-width: 1.5; }
+@media (max-width: 520px) { .fz-head { grid-template-columns: 1fr; } .fz-art { width: 120px; justify-self: end; order: -1; } }
 
 .fz-error { margin: 0; padding: 12px 16px; border-radius: var(--r); background: color-mix(in srgb, var(--coral) 14%, var(--panel)); border: 1px solid var(--coral); }
 

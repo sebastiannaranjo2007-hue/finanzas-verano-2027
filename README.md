@@ -1,4 +1,4 @@
-# Finanzas Verano 2027
+# NYC
 
 App web sencilla para seguir el ahorro, el presupuesto y los gastos del verano 2027 (Cedar Point y Nueva York). Es una página estática: HTML, CSS y JavaScript, sin servidor ni base de datos, pensada para publicarse gratis con GitHub Pages.
 
@@ -16,6 +16,7 @@ App web sencilla para seguir el ahorro, el presupuesto y los gastos del verano 2
 
 ```
 index.html          la página
+favicon.svg         el ícono de la pestaña
 styles.css          el diseño (modo claro y oscuro)
 app.js              las cuentas y el gráfico
 data/
