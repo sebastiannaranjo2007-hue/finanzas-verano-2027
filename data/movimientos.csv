@@ -2,3 +2,4 @@ id,fecha,tipo,grupo,concepto,detalle,moneda,monto,usd,cop
 1,2026-11-11,ahorro,Ahorro,Ahorro,Ahorro que ya tenías (en dólares),USD,640,640,2110125
 2,2026-11-12,gasto,Programa,Inscripción y entrevista de inglés,Pago a SEI,COP,150000,45.49,150000
 3,2026-11-12,gasto,Programa,Abono para separar el cupo,Pago a SEI,COP,1200000,363.96,1200000
+4,2026-11-12,ahorro,Ahorro,Ahorro,Ahorro en dólares,USD,66,66,217607
