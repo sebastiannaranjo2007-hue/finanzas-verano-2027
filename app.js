@@ -38,10 +38,9 @@
     const [head, ...body] = rows;
     return body.map((r) => Object.fromEntries(head.map((h, i) => [h.trim(), (r[i] ?? '').trim()])));
   }
-  const load = (name) => fetch('data/' + name + '.csv', {cache: 'no-store'}).then((r) => {
-    if (!r.ok) throw new Error(name + ': ' + r.status);
-    return r.text();
-  }).then(parseCSV);
+  // Busca cada CSV en data/ y, si no está ahí, junto a index.html.
+  const get = (path) => fetch(path, {cache: 'no-store'}).then((r) => { if (!r.ok) throw new Error(path + ': ' + r.status); return r.text(); });
+  const load = (name) => get('data/' + name + '.csv').catch(() => get(name + '.csv')).then(parseCSV);
 
   // ---------- cuentas ----------
   // Reparte el gasto de cada cuenta entre sus conceptos en orden:
