@@ -64,16 +64,19 @@
     });
   }
 
-  function serieAhorro(movimientos) {
+  // El ahorro se guarda en dólares: lo que vale en pesos se calcula siempre con la TRM de hoy
+  function serieAhorro(movimientos, tasa) {
     const porDia = new Map();
-    movimientos.filter((m) => m.tipo === 'ahorro').forEach((m) => porDia.set(m.fecha, (porDia.get(m.fecha) || 0) + n(m.cop)));
+    movimientos.filter((m) => m.tipo === 'ahorro').forEach((m) => porDia.set(m.fecha, (porDia.get(m.fecha) || 0) + n(m.usd) * tasa));
     let acc = 0;
     return [...porDia.keys()].sort().map((fecha) => { acc += porDia.get(fecha); return {fecha, acumulado_cop: Math.round(acc)}; });
   }
 
   function totales(filas, movimientos, plan, parametros) {
     const ahorros = movimientos.filter((m) => m.tipo === 'ahorro');
-    const ahorrado_cop = Math.round(ahorros.reduce((s, m) => s + n(m.cop), 0));
+    const ahorrado_usd = r2(ahorros.reduce((s, m) => s + n(m.usd), 0));
+    const tasa = n((parametros[0] || {}).tasa_cop_usd);
+    const ahorrado_cop = Math.round(ahorrado_usd * tasa);
     const hitos = plan.map((p) => ({t: toTime(p.fecha), v: n(p.meta_acumulada_cop)})).sort((a, b) => a.t - b.t);
     const hoy = Date.now();
     let esperado = hitos.length ? hitos[0].v : 0;
@@ -84,14 +87,13 @@
     }
     const meta_cop = hitos.length ? hitos[hitos.length - 1].v : 0;
     const p0 = parametros[0] || {};
-    const tasa = n(p0.tasa_cop_usd);
     const suma = (bolsa, campo) => r2(filas.filter((f) => f.bolsa === bolsa).reduce((s, f) => s + n(f[campo]), 0));
     const presupuesto_nyc = suma('Nueva York', 'presupuesto_usd');
     // Fondo = ahorro planeado (en dólares) + almuerzos invitados − presupuesto de Nueva York
     const fondo_inicial = r2((tasa ? meta_cop / tasa : 0) + n(p0.ahorro_almuerzos_usd) - presupuesto_nyc);
     const fondo_usado = r2(suma('Nueva York', 'sobrecosto_usd') + suma('Sueldo en Cedar Point', 'sobrecosto_usd'));
     return {
-      tasa, fecha_tasa: p0.fecha_tasa, ahorrado_cop, meta_cop,
+      tasa, fecha_tasa: p0.fecha_tasa, ahorrado_usd, ahorrado_cop, meta_cop,
       avance: meta_cop ? ahorrado_cop / meta_cop : 0,
       esperado: Math.round(esperado), dif: Math.round(ahorrado_cop - esperado),
       fondo_inicial, fondo_usado, fondo_restante: r2(fondo_inicial - fondo_usado),
@@ -127,7 +129,7 @@
   function renderResumen(t) {
     setText('v-tasa', t.tasa.toLocaleString('es-CO', {minimumFractionDigits: 2}));
     setText('v-tasa-fecha', t.fecha_tasa ? fDate(t.fecha_tasa) : '—');
-    const usdAhorro = t.tasa ? t.ahorrado_cop / t.tasa : 0, usdMeta = t.tasa ? t.meta_cop / t.tasa : 0;
+    const usdAhorro = t.ahorrado_usd, usdMeta = t.tasa ? t.meta_cop / t.tasa : 0;
     const enUsd = state.cur === 'usd';
     setText('bal-amount', enUsd ? usd(usdAhorro) : cop(t.ahorrado_cop));
     setText('bal-other', enUsd ? cop(t.ahorrado_cop) : '≈ ' + usd(usdAhorro));
@@ -600,7 +602,7 @@
   function refresh() {
     const {presupuesto, movimientos, plan, parametros} = raw;
     const filas = porConcepto(presupuesto, movimientos);
-    const serie = serieAhorro(movimientos);
+    const serie = serieAhorro(movimientos, n((parametros[0] || {}).tasa_cop_usd));
     const t = totales(filas, movimientos, plan, parametros);
     state.data = {filas, serie, plan, movimientos, t};
     renderResumen(t);
