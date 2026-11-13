@@ -255,9 +255,9 @@ html.locked body { overflow: hidden; }
 .add-btn:active { transform: scale(.97); }
 @media (max-width: 720px) { .add-btn { display: none; } }
 
-.item.tap { cursor: pointer; transition: border-color .15s, transform .12s; -webkit-tap-highlight-color: transparent; }
-.item.tap:hover { border-color: color-mix(in srgb, var(--sky) 45%, var(--line)); }
-.item.tap:active { transform: scale(.985); }
+.item.tap, .tx.tap { cursor: pointer; transition: border-color .15s, transform .12s; -webkit-tap-highlight-color: transparent; }
+.item.tap:hover, .tx.tap:hover { border-color: color-mix(in srgb, var(--sky) 45%, var(--line)); }
+.item.tap:active, .tx.tap:active { transform: scale(.985); }
 
 .sheet {
   border: none; padding: 0; color: var(--fg); background: var(--panel);

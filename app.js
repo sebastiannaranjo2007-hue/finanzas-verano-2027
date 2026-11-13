@@ -160,7 +160,10 @@
 
   function itemMov(m, i) {
     const g = m.tipo === 'gasto';
-    const row = el('div', 'tx pop'); row.style.animationDelay = Math.min(i, 10) * 30 + 'ms';
+    const row = el('div', 'tx pop tap'); row.style.animationDelay = Math.min(i, 10) * 30 + 'ms';
+    // tocar la fila la abre para corregirla o borrarla (ver el listener de l-recientes y l-movimientos)
+    row.dataset.id = m.id; row.tabIndex = 0; row.setAttribute('role', 'button');
+    row.setAttribute('aria-label', 'Corregir ' + (TIPOS[m.tipo] || m.tipo).toLowerCase() + ': ' + m.concepto + ', ' + usd(n(m.usd)) + ', ' + fDate(m.fecha));
     const ic = el('span', 'tx-ic ' + (g ? 'out' : 'in'));
     ic.innerHTML = g ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 7 7 17M15 17H7V9"/></svg>';
     row.appendChild(ic);
