@@ -50,7 +50,7 @@
     movimientos.filter((m) => m.tipo === 'gasto').forEach((m) => porCuenta.set(m.concepto, (porCuenta.get(m.concepto) || 0) + n(m.usd)));
     const filas = presupuesto.map((p) => ({bolsa: p.bolsa, orden: n(p.orden), concepto: p.concepto, cuenta: p.cuenta || p.concepto, presupuesto_usd: n(p.presupuesto_usd), nota: p.nota || ''}))
       .sort((a, b) => a.orden - b.orden);
-    porCuenta.forEach((v, c) => { if (!filas.some((f) => f.cuenta === c)) filas.push({bolsa: 'Nueva York', orden: 999, concepto: c, cuenta: c, presupuesto_usd: 0, nota: 'Sin presupuesto: sale del fondo'}); });
+    porCuenta.forEach((v, c) => { if (!filas.some((f) => f.cuenta === c)) filas.push({bolsa: 'Nueva York', orden: 999, concepto: c, cuenta: c, presupuesto_usd: 0, nota: 'Sin presupuesto: sale del colchón'}); });
     const resto = new Map(porCuenta);
     return filas.map((f, i) => {
       const ultima = !filas.slice(i + 1).some((o) => o.cuenta === f.cuenta);
@@ -59,21 +59,24 @@
       resto.set(f.cuenta, disp - g);
       const sobre = Math.max(0, r2(g - f.presupuesto_usd));
       let estado = 'Pendiente';
-      if (g > 0) estado = f.presupuesto_usd === 0 ? 'Del fondo' : (sobre > 0 ? 'Te pasaste' : (g >= f.presupuesto_usd ? 'Pagado' : 'En curso'));
+      if (g > 0) estado = f.presupuesto_usd === 0 ? 'Del colchón' : (sobre > 0 ? 'Te pasaste' : (g >= f.presupuesto_usd ? 'Pagado' : 'En curso'));
       return {...f, gastado_usd: g, restante_usd: r2(f.presupuesto_usd - g), sobrecosto_usd: sobre, estado};
     });
   }
 
+  // Colchón: arranca en US$0 y crece con cada almuerzo invitado (no es ahorro para Nueva York)
+  const esColchon = (m) => m.tipo === 'ahorro' && m.grupo === 'Colchón';
+  const esAhorroNyc = (m) => m.tipo === 'ahorro' && m.grupo !== 'Colchón';
   // El ahorro se guarda en dólares: lo que vale en pesos se calcula siempre con la TRM de hoy
   function serieAhorro(movimientos, tasa) {
     const porDia = new Map();
-    movimientos.filter((m) => m.tipo === 'ahorro').forEach((m) => porDia.set(m.fecha, (porDia.get(m.fecha) || 0) + n(m.usd) * tasa));
+    movimientos.filter(esAhorroNyc).forEach((m) => porDia.set(m.fecha, (porDia.get(m.fecha) || 0) + n(m.usd) * tasa));
     let acc = 0;
     return [...porDia.keys()].sort().map((fecha) => { acc += porDia.get(fecha); return {fecha, acumulado_cop: Math.round(acc)}; });
   }
 
   function totales(filas, movimientos, plan, parametros) {
-    const ahorros = movimientos.filter((m) => m.tipo === 'ahorro');
+    const ahorros = movimientos.filter(esAhorroNyc);
     const ahorrado_usd = r2(ahorros.reduce((s, m) => s + n(m.usd), 0));
     const tasa = n((parametros[0] || {}).tasa_cop_usd);
     const ahorrado_cop = Math.round(ahorrado_usd * tasa);
@@ -89,14 +92,15 @@
     const p0 = parametros[0] || {};
     const suma = (bolsa, campo) => r2(filas.filter((f) => f.bolsa === bolsa).reduce((s, f) => s + n(f[campo]), 0));
     const presupuesto_nyc = suma('Nueva York', 'presupuesto_usd');
-    // Fondo = ahorro planeado (en dólares) + almuerzos invitados − presupuesto de Nueva York
-    const fondo_inicial = r2((tasa ? meta_cop / tasa : 0) + n(p0.ahorro_almuerzos_usd) - presupuesto_nyc);
+    // Colchón = lo que suman los almuerzos invitados registrados − lo que se ha usado
+    const fondo_inicial = r2(movimientos.filter(esColchon).reduce((s, m) => s + n(m.usd), 0));
+    const fondo_meta = n(p0.ahorro_almuerzos_usd);
     const fondo_usado = r2(suma('Nueva York', 'sobrecosto_usd') + suma('Sueldo en Cedar Point', 'sobrecosto_usd'));
     return {
       tasa, fecha_tasa: p0.fecha_tasa, ahorrado_usd, ahorrado_cop, meta_cop,
       avance: meta_cop ? ahorrado_cop / meta_cop : 0,
       esperado: Math.round(esperado), dif: Math.round(ahorrado_cop - esperado),
-      fondo_inicial, fondo_usado, fondo_restante: r2(fondo_inicial - fondo_usado),
+      fondo_inicial, fondo_meta, fondo_usado, fondo_restante: r2(fondo_inicial - fondo_usado),
       presupuesto_nyc, gastado_nyc: suma('Nueva York', 'gastado_usd'),
       presupuesto_papa: suma('Préstamo', 'presupuesto_usd'), gastado_papa: suma('Préstamo', 'gastado_usd')
     };
@@ -117,11 +121,11 @@
   const CORTO = {'Préstamo': 'Préstamo', 'Nueva York': 'Nueva York', 'Sueldo en Cedar Point': 'Sueldo'};
   const NOTA = {
     'Préstamo': 'Cedar Point se paga con el préstamo: lo que cueste no toca tu plata. Lo usado es lo que devuelves.',
-    'Nueva York': 'Tu plata. De los vuelos, lo que pase de US$800 va aquí. Si te pasas en un concepto, sale del fondo para imprevistos.',
-    'Sueldo en Cedar Point': 'Gastos de vida durante el trabajo. Lo que te pases, y todo gasto de almuerzo, sale del fondo para imprevistos.'
+    'Nueva York': 'Tu plata. De los vuelos, lo que pase de US$800 va aquí. Si te pasas en un concepto, sale del colchón.',
+    'Sueldo en Cedar Point': 'Gastos de vida durante el trabajo. Lo que te pases, y todo gasto de almuerzo, sale del colchón.'
   };
   const COLOR = {'Préstamo': 'var(--grape)', 'Nueva York': 'var(--coral)', 'Sueldo en Cedar Point': 'var(--sun)'};
-  const PILL = {'Te pasaste': 'bad', 'Del fondo': 'warn', 'Pagado': 'ok', 'En curso': 'ok'};
+  const PILL = {'Te pasaste': 'bad', 'Del colchón': 'warn', 'Pagado': 'ok', 'En curso': 'ok'};
   const TIPOS = {gasto: 'Gasto', ahorro: 'Ahorro'};
   const state = {bolsa: 'Nueva York', filtro: 'todos', data: null, cur: 'usd'};
   try { const c = localStorage.getItem('nyc-cur2'); if (c === 'usd' || c === 'cop') state.cur = c; } catch (e) {}
@@ -132,16 +136,14 @@
     const usdAhorro = t.ahorrado_usd, usdMeta = t.tasa ? t.meta_cop / t.tasa : 0;
     const enUsd = state.cur === 'usd';
     setText('bal-amount', enUsd ? usd(usdAhorro) : cop(t.ahorrado_cop));
-    setText('bal-other', enUsd ? cop(t.ahorrado_cop) : '≈ ' + usd(usdAhorro));
-    setText('bal-meta', enUsd ? usd(usdMeta) : cop(t.meta_cop));
     document.querySelectorAll('.cur [data-cur]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.cur === state.cur)));
     ['a-ahorro'].forEach((id) => setText(id, cop(t.ahorrado_cop)));
     setText('a-meta', cop(t.meta_cop));
     setText('v-avance', pct(t.avance)); setText('a-avance', pct(t.avance));
     const d = $('v-dif');
-    if (d) { d.textContent = (t.dif > 0 ? '▲ +' : t.dif < 0 ? '▼ ' : '') + cop(t.dif); d.className = 'delta ' + (t.dif >= 0 ? 'up' : 'down'); }
+    if (d) { d.textContent = (t.dif > 0 ? '▲ +' : t.dif < 0 ? '▼ ' : '') + (enUsd && t.tasa ? usd(t.dif / t.tasa) : cop(t.dif)); d.className = 'delta ' + (t.dif >= 0 ? 'up' : 'down'); }
     setText('v-esperado', cop(t.esperado));
-    setText('v-fondo', usd(t.fondo_restante)); setText('v-fondo-ini', usd(t.fondo_inicial)); setText('v-fondo-usado', usd(t.fondo_usado));
+    setText('v-fondo', usd(t.fondo_restante)); setText('v-fondo-meta', usd(t.fondo_meta));
     setText('v-gastado-nyc', usd(t.gastado_nyc)); setText('v-pres-nyc', usd(t.presupuesto_nyc));
     setText('v-deuda', usd(t.gastado_papa)); setText('v-pres-papa', usd(t.presupuesto_papa));
   }
@@ -149,7 +151,7 @@
     const t = state.data && state.data.t; if (!t) return;
     if (view === 'resumen') {
       meter('m-ahorro', t.avance);
-      meter('m-fondo', t.fondo_inicial ? t.fondo_restante / t.fondo_inicial : 0, t.fondo_restante < t.fondo_inicial * 0.25 ? 'var(--coral)' : '');
+      meter('m-fondo', t.fondo_meta ? Math.max(0, t.fondo_restante) / t.fondo_meta : 0, t.fondo_restante < 0 ? 'var(--coral)' : '');
       meter('m-nyc', t.presupuesto_nyc ? t.gastado_nyc / t.presupuesto_nyc : 0);
       meter('m-papa', t.presupuesto_papa ? t.gastado_papa / t.presupuesto_papa : 0);
     }
@@ -164,8 +166,9 @@
     row.appendChild(ic);
     const mid = el('div', 'tx-mid'); mid.appendChild(el('div', 'tx-title', m.concepto));
     mid.appendChild(el('div', 'tx-sub', fDate(m.fecha) + (m.detalle ? ' · ' + m.detalle : ''))); row.appendChild(mid);
-    const amt = el('div', 'tx-amt'); amt.appendChild(el('div', 'tx-usd ' + (g ? '' : 'pos'), (g ? '−' : '+') + usd(n(m.usd))));
-    amt.appendChild(el('div', 'tx-cop', cop(n(m.cop)))); row.appendChild(amt);
+    // una sola cifra por movimiento, en la moneda que elegiste arriba
+    const amt = el('div', 'tx-amt'); amt.appendChild(el('div', 'tx-usd ' + (g ? '' : 'pos'), (g ? '−' : '+') + (state.cur === 'cop' ? cop(n(m.cop)) : usd(n(m.usd)))));
+    row.appendChild(amt);
     return row;
   }
   const ordenMov = (arr) => arr.slice().sort((a, b) => (b.fecha + String(b.id).padStart(6, '0')).localeCompare(a.fecha + String(a.id).padStart(6, '0')));
@@ -368,7 +371,7 @@
   document.querySelectorAll('#chips-mov .chip').forEach((c) => c.addEventListener('click', () => { state.filtro = c.dataset.f; renderMovimientos(); }));
   document.querySelectorAll('.cur [data-cur]').forEach((b) => b.addEventListener('click', () => {
     state.cur = b.dataset.cur; try { localStorage.setItem('nyc-cur2', state.cur); } catch (e) {}
-    if (state.data) renderResumen(state.data.t);
+    if (state.data) { renderResumen(state.data.t); renderRecientes(state.data.movimientos || []); renderMovimientos(); }
   }));
   show(current(), true);
 
@@ -426,7 +429,7 @@
     });
     const otros = [...new Set((raw.movimientos || []).filter((m) => m.tipo === 'gasto' && !vistos.has(m.concepto)).map((m) => m.concepto))];
     grupos.forEach((cs, b) => { const g = el('optgroup'); g.label = TITULO[b] || b; cs.forEach((c) => { const o = el('option', null, c); o.value = c; g.appendChild(o); }); sel.appendChild(g); });
-    const g = el('optgroup'); g.label = 'Otro (sale del fondo)';
+    const g = el('optgroup'); g.label = 'Otro (sale del colchón)';
     otros.forEach((c) => { const o = el('option', null, c); o.value = c; g.appendChild(o); });
     const o = el('option', null, 'Otra cosa…'); o.value = '__otro'; g.appendChild(o); sel.appendChild(g);
   }
@@ -462,11 +465,12 @@
       $('f-trm').value = r2(trm).toLocaleString('es-CO', {minimumFractionDigits: 2});
       $('f-fecha').value = m.fecha; $('f-detalle').value = m.detalle || ''; $('f-otro').value = '';
       if (m.tipo === 'gasto') $('f-concepto').value = m.concepto;
+      $('f-destino').value = m.grupo === 'Colchón' ? 'colchon' : 'nyc';
     } else {
       setRadio('tipo', 'gasto'); setRadio('moneda', 'COP');
       $('f-monto').value = ''; $('f-detalle').value = ''; $('f-otro').value = ''; $('f-fecha').value = hoyISO();
       $('f-trm').value = tasaApp().toLocaleString('es-CO', {minimumFractionDigits: 2});
-      $('f-concepto').value = 'Comida';
+      $('f-concepto').value = 'Comida'; $('f-destino').value = 'nyc';
       if (!$('f-concepto').value) $('f-concepto').selectedIndex = 0;
     }
     $('f-trm-save').checked = true;
@@ -496,7 +500,8 @@
     ev.preventDefault(); if (f.busy) return;
     const tp = tipo(), mon = moneda();
     const monto = parseMonto($('f-monto').value, mon), trm = parseTrm($('f-trm').value), fecha = $('f-fecha').value;
-    let concepto = tp === 'ahorro' ? 'Ahorro' : $('f-concepto').value;
+    const colchon = tp === 'ahorro' && $('f-destino').value === 'colchon';
+    let concepto = tp === 'ahorro' ? (colchon ? 'Almuerzo invitado' : 'Ahorro') : $('f-concepto').value;
     if (concepto === '__otro') concepto = $('f-otro').value.trim();
     if (!(monto > 0)) return msg('f-msg', 'Escribe el monto.', true);
     if (!(trm > 0)) return msg('f-msg', 'Escribe la TRM.', true);
@@ -504,8 +509,8 @@
     if (!concepto) return msg('f-msg', 'Escribe qué fue el gasto.', true);
     const pres = (raw.presupuesto || []).find((p) => (p.cuenta || p.concepto) === concepto);
     const row = {
-      fecha, tipo: tp, grupo: tp === 'ahorro' ? 'Ahorro' : (pres ? pres.bolsa : 'Otro'), concepto,
-      detalle: $('f-detalle').value.trim() || (tp === 'ahorro' ? (mon === 'USD' ? 'Ahorro en dólares' : 'Ahorro en pesos') : ''),
+      fecha, tipo: tp, grupo: tp === 'ahorro' ? (colchon ? 'Colchón' : 'Ahorro') : (pres ? pres.bolsa : 'Otro'), concepto,
+      detalle: $('f-detalle').value.trim() || (colchon ? '' : tp === 'ahorro' ? (mon === 'USD' ? 'Ahorro en dólares' : 'Ahorro en pesos') : ''),
       moneda: mon, monto: String(monto),
       usd: String(mon === 'USD' ? monto : r2(monto / trm)), cop: String(mon === 'COP' ? monto : Math.round(monto * trm))
     };

@@ -9,7 +9,7 @@ App web sencilla para seguir el ahorro, el presupuesto y los gastos del verano 2
 Cuatro secciones, con pestañas arriba en el computador y una barra abajo en el celular: **Resumen**, **Ahorro**, **Presupuesto** (una bolsa a la vez) y **Ruta NYC** (el plan día por día del 4 al 7 de agosto, con links a Google Maps). Los **Movimientos** se abren desde el Resumen con "Ver todos". Cada sección tiene su link: `#resumen`, `#ahorro`, `#presupuesto`, `#ruta`, `#movimientos`.
 
 - **Ahorro para Nueva York** frente a la meta y frente al plan a la fecha de hoy.
-- **Fondo para imprevistos**: ahorro planeado + almuerzos invitados − presupuesto de Nueva York, menos lo que te pases.
+- **Colchón**: arranca en US$0 y crece con cada almuerzo invitado (en el formulario: Ahorro → Va para → Colchón · almuerzo invitado), menos lo que te pases en Nueva York o en el sueldo. No cuenta como ahorro para Nueva York.
 - **Tres bolsas separadas**:
   - **Préstamo · Cedar Point**: programa, visa, tren y los primeros US$800 de los vuelos. Lo usado es lo que se devuelve.
   - **Tu plata · Nueva York**: lo que pasa de US$800 en vuelos, hotel, comida, metro, Estatua de la Libertad, AirTrain e iPhone.
