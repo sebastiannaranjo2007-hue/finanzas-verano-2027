@@ -121,17 +121,23 @@
   const COLOR = {'Préstamo': 'var(--grape)', 'Nueva York': 'var(--coral)', 'Sueldo en Cedar Point': 'var(--sun)'};
   const PILL = {'Te pasaste': 'bad', 'Del fondo': 'warn', 'Pagado': 'ok', 'En curso': 'ok'};
   const TIPOS = {gasto: 'Gasto', ahorro: 'Ahorro'};
-  const state = {bolsa: 'Nueva York', filtro: 'todos', data: null};
+  const state = {bolsa: 'Nueva York', filtro: 'todos', data: null, cur: 'cop'};
+  try { const c = localStorage.getItem('nyc-cur'); if (c === 'usd' || c === 'cop') state.cur = c; } catch (e) {}
 
   function renderResumen(t) {
     setText('v-tasa', t.tasa.toLocaleString('es-CO', {minimumFractionDigits: 2}));
     setText('v-tasa-fecha', t.fecha_tasa ? fDate(t.fecha_tasa) : '—');
-    ['v-ahorro', 'v-ahorro-take', 'a-ahorro'].forEach((id) => setText(id, cop(t.ahorrado_cop)));
-    ['v-meta', 'a-meta'].forEach((id) => setText(id, cop(t.meta_cop)));
+    const usdAhorro = t.tasa ? t.ahorrado_cop / t.tasa : 0, usdMeta = t.tasa ? t.meta_cop / t.tasa : 0;
+    const enUsd = state.cur === 'usd';
+    setText('bal-amount', enUsd ? usd(usdAhorro) : cop(t.ahorrado_cop));
+    setText('bal-other', enUsd ? cop(t.ahorrado_cop) : '≈ ' + usd(usdAhorro));
+    setText('bal-meta', enUsd ? usd(usdMeta) : cop(t.meta_cop));
+    document.querySelectorAll('.seg [data-cur]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.cur === state.cur)));
+    ['a-ahorro'].forEach((id) => setText(id, cop(t.ahorrado_cop)));
+    setText('a-meta', cop(t.meta_cop));
     setText('v-avance', pct(t.avance)); setText('a-avance', pct(t.avance));
-    setText('v-dif-a', cop(Math.abs(t.dif))); setText('v-dif-b', cop(Math.abs(t.dif)));
-    $('s-ahead').hidden = !(t.dif > 0); $('s-behind').hidden = !(t.dif < 0); $('s-even').hidden = t.dif !== 0;
-    const d = $('v-dif'); d.textContent = (t.dif > 0 ? '+' : '') + cop(t.dif); d.className = 'fz-big ' + (t.dif >= 0 ? 'pos' : 'neg');
+    const d = $('v-dif');
+    if (d) { d.textContent = (t.dif > 0 ? '▲ +' : t.dif < 0 ? '▼ ' : '') + cop(t.dif); d.className = 'delta ' + (t.dif >= 0 ? 'up' : 'down'); }
     setText('v-esperado', cop(t.esperado));
     setText('v-fondo', usd(t.fondo_restante)); setText('v-fondo-ini', usd(t.fondo_inicial)); setText('v-fondo-usado', usd(t.fondo_usado));
     setText('v-gastado-nyc', usd(t.gastado_nyc)); setText('v-pres-nyc', usd(t.presupuesto_nyc));
@@ -149,15 +155,16 @@
   }
 
   function itemMov(m, i) {
-    const card = el('div', 'item pop tap'); card.style.animationDelay = Math.min(i, 10) * 30 + 'ms';
-    card.dataset.id = m.id; card.tabIndex = 0; card.setAttribute('role', 'button');
-    card.setAttribute('aria-label', 'Corregir ' + (TIPOS[m.tipo] || m.tipo).toLowerCase() + ': ' + m.concepto + ', ' + usd(n(m.usd)) + ', ' + fDate(m.fecha));
-    card.appendChild(el('div', 'it-date', fDate(m.fecha)));
-    const side = el('div', 'it-side'); side.appendChild(el('span', 'fz-pill ' + (m.tipo === 'gasto' ? 'info' : 'ok'), TIPOS[m.tipo] || m.tipo)); card.appendChild(side);
-    const tt = el('div', 'it-full it-title', m.concepto); if (m.detalle) tt.appendChild(el('span', 'it-sub', m.detalle)); card.appendChild(tt);
-    card.appendChild(el('div', 'it-amount ' + (m.tipo === 'gasto' ? 'neg' : 'pos'), (m.tipo === 'gasto' ? '−' : '+') + usd(n(m.usd))));
-    card.appendChild(el('div', 'it-cop', cop(n(m.cop))));
-    return card;
+    const g = m.tipo === 'gasto';
+    const row = el('div', 'tx pop'); row.style.animationDelay = Math.min(i, 10) * 30 + 'ms';
+    const ic = el('span', 'tx-ic ' + (g ? 'out' : 'in'));
+    ic.innerHTML = g ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 7 7 17M15 17H7V9"/></svg>';
+    row.appendChild(ic);
+    const mid = el('div', 'tx-mid'); mid.appendChild(el('div', 'tx-title', m.concepto));
+    mid.appendChild(el('div', 'tx-sub', fDate(m.fecha) + (m.detalle ? ' · ' + m.detalle : ''))); row.appendChild(mid);
+    const amt = el('div', 'tx-amt'); amt.appendChild(el('div', 'tx-usd ' + (g ? '' : 'pos'), (g ? '−' : '+') + usd(n(m.usd))));
+    amt.appendChild(el('div', 'tx-cop', cop(n(m.cop)))); row.appendChild(amt);
+    return row;
   }
   const ordenMov = (arr) => arr.slice().sort((a, b) => (b.fecha + String(b.id).padStart(6, '0')).localeCompare(a.fecha + String(a.id).padStart(6, '0')));
 
@@ -259,10 +266,10 @@
       let line = 'M' + x(pts[0].t) + ',' + y(pts[0].v);
       for (let i = 1; i < pts.length; i++) line += 'H' + x(pts[i].t) + 'V' + y(pts[i].v);
       const area = line + 'V' + y(0) + 'H' + x(pts[0].t) + 'Z';
-      svgEl('path', {d: area, fill: 'color-mix(in srgb, var(--mint) 16%, transparent)'}, svg);
-      svgEl('path', {d: line, fill: 'none', stroke: 'var(--mint)', 'stroke-width': 3}, svg);
+      svgEl('path', {d: area, fill: 'color-mix(in srgb, var(--lime) 16%, transparent)'}, svg);
+      svgEl('path', {d: line, fill: 'none', stroke: 'var(--lime)', 'stroke-width': 3}, svg);
       const last = real[real.length - 1];
-      const lt = svgEl('text', {x: x(last.t) + 8, y: y(last.v) + 18, class: 'axis', fill: 'var(--mint)'}, svg); lt.textContent = cop(last.v); lt.style.fill = 'var(--mint)';
+      const lt = svgEl('text', {x: x(last.t) + 8, y: y(last.v) + 18, class: 'axis', fill: 'var(--lime)'}, svg); lt.textContent = cop(last.v); lt.style.fill = 'var(--lime)';
     }
     const goal = pl[pl.length - 1];
     if (goal) { const gt = svgEl('text', {x: x(goal.t), y: y(goal.v) - 10, 'text-anchor': 'end', class: 'axis'}, svg); gt.textContent = 'Meta ' + cop(goal.v); }
@@ -282,7 +289,7 @@
       c.addEventListener('pointerleave', hide);
     });
     real.forEach((p) => {
-      const c = svgEl('circle', {cx: x(p.t), cy: y(p.v), r: 6, fill: 'var(--mint)', stroke: 'var(--panel)', 'stroke-width': 2}, svg);
+      const c = svgEl('circle', {cx: x(p.t), cy: y(p.v), r: 6, fill: 'var(--lime)', stroke: 'var(--panel)', 'stroke-width': 2}, svg);
       c.addEventListener('pointerenter', (e) => show(e, [['Ahorrado al', fDate(p.fecha)], ['Acumulado', cop(p.v)]]));
       c.addEventListener('pointerleave', hide);
     });
@@ -357,6 +364,10 @@
   window.addEventListener('hashchange', () => show(current()));
   document.querySelectorAll('a[data-bolsa]').forEach((a) => a.addEventListener('click', () => { state.bolsa = a.dataset.bolsa; if (state.data) renderBolsa(); }));
   document.querySelectorAll('#chips-mov .chip').forEach((c) => c.addEventListener('click', () => { state.filtro = c.dataset.f; renderMovimientos(); }));
+  document.querySelectorAll('.seg [data-cur]').forEach((b) => b.addEventListener('click', () => {
+    state.cur = b.dataset.cur; try { localStorage.setItem('nyc-cur', state.cur); } catch (e) {}
+    if (state.data) renderResumen(state.data.t);
+  }));
   show(current(), true);
 
   // ---------- GitHub: guardar cambios en el repositorio ----------

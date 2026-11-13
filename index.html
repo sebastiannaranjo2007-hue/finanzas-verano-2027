@@ -9,14 +9,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="NYC">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#fbf8f3" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#14161d" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0b0e">
 <meta name="description" content="Ahorro, presupuesto y gastos del verano 2027: Cedar Point y Nueva York.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap">
 <style>
 /* Candado mínimo en línea: funciona aunque el navegador tenga guardada una versión vieja de styles.css */
 html.locked body > :not(.lock) { display: none !important; }
@@ -24,7 +23,7 @@ html.locked .lock { display: grid !important; place-items: center; position: fix
 .lock { display: none; }
 </style>
 <link rel="stylesheet" href="styles.css?v=20261113b">
-<script src="lock.js?v=20261112b"></script>
+<script src="lock.js?v=20261113a"></script>
 </head>
 <body>
 <div class="lock" id="lock" role="dialog" aria-modal="true" aria-labelledby="lock-title">
@@ -62,45 +61,32 @@ html.locked .lock { display: grid !important; place-items: center; position: fix
 
   <!-- RESUMEN -->
   <section class="view" id="v-resumen" data-view="resumen">
-    <div class="fz-head">
-      <div class="fz-head-txt">
-        <p class="eyebrow">Verano 2027 · Cedar Point y Nueva York</p>
-        <p class="fz-take">
-          Llevas <b id="v-ahorro-take">—</b> ahorrados para el viaje, el <b id="v-avance">—</b> de la meta.
-          <span id="s-ahead" hidden><span class="fz-ok">Vas adelantado</span> por <b id="v-dif-a">—</b>.</span>
-          <span id="s-behind" hidden><span class="fz-bad">Vas atrasado</span> por <b id="v-dif-b">—</b>.</span>
-          <span id="s-even" hidden>Vas justo en el plan.</span>
-        </p>
+    <div class="balance">
+      <div class="bal-top">
+        <span class="bal-label">Ahorro para Nueva York</span>
+        <div class="seg" role="group" aria-label="Moneda">
+          <button type="button" data-cur="cop" aria-pressed="true">COP</button>
+          <button type="button" data-cur="usd" aria-pressed="false">USD</button>
+        </div>
       </div>
-      <svg class="fz-art" viewBox="0 0 160 100" role="img" aria-label="Monedas, alcancía y gráfico que sube, con edificios de Nueva York al fondo">
-      <rect class="bld" x="8" y="38" width="16" height="52" rx="1.5"/><rect class="bld" x="27" y="22" width="14" height="68" rx="1.5"/><path class="bld" d="M31 22 L34 8 L37 22 Z"/><rect class="bld" x="44" y="46" width="18" height="44" rx="1.5"/>
-      <rect class="bld" x="112" y="30" width="16" height="60" rx="1.5"/><rect class="bld" x="131" y="44" width="20" height="46" rx="1.5"/>
-      <path class="win" d="M12 46h3M19 46h3M12 54h3M19 54h3M12 62h3M19 62h3M31 30h2M36 30h2M31 38h2M36 38h2M31 46h2M36 46h2M31 54h2M36 54h2M48 54h3M55 54h3M48 62h3M55 62h3M116 38h3M123 38h3M116 46h3M123 46h3M116 54h3M123 54h3M135 52h3M144 52h3M135 60h3M144 60h3"/>
-      <rect class="bar" x="66" y="66" width="9" height="24" rx="2"/><rect class="bar" x="78" y="56" width="9" height="34" rx="2"/><rect class="bar" x="90" y="44" width="9" height="46" rx="2"/>
-      <path class="arrow" d="M64 60 L82 46 L92 52 L108 34"/><path class="arrow" d="M100 34 H108 V42"/>
-      <ellipse class="coin" cx="40" cy="86" rx="14" ry="4.5"/><rect class="coin" x="26" y="78" width="28" height="8"/><ellipse class="coin" cx="40" cy="78" rx="14" ry="4.5"/><rect class="coin" x="26" y="70" width="28" height="8"/><ellipse class="coin-top" cx="40" cy="70" rx="14" ry="4.5"/>
-      <circle class="coin" cx="128" cy="74" r="14"/><circle class="coin-top" cx="128" cy="74" r="10.5"/><text class="sign" x="128" y="79" text-anchor="middle">$</text>
-      <line class="ground" x1="2" y1="90" x2="158" y2="90"/>
-    </svg>
+      <div class="bal-amount" id="bal-amount">—</div>
+      <div class="bal-sub"><span id="bal-other">—</span> · <span id="v-avance">—</span> de la meta de <span id="bal-meta">—</span></div>
+      <div class="fz-meter big"><i id="m-ahorro"></i></div>
+      <div class="bal-foot"><span class="delta" id="v-dif">—</span><span>frente al plan de hoy</span></div>
     </div>
 
+    <nav class="quick" aria-label="Accesos">
+      <a href="#ahorro"><span class="q-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18 9.5 12l3.5 3.5L20 8M15 8h5v5"/></svg></span>Ahorro</a>
+      <a href="#presupuesto"><span class="q-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="6" width="17" height="13" rx="2.5"/><path d="M3.5 10h17M15 14.5h2.5"/></svg></span>Presupuesto</a>
+      <a href="#ruta"><span class="q-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg></span>Ruta</a>
+      <a href="#movimientos"><span class="q-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3"/></svg></span>Movimientos</a>
+    </nav>
+
     <div class="fz-tiles">
-      <a class="fz-card fz-c-mint tile-wide" href="#ahorro">
-        <span class="fz-label">Ahorrado para Nueva York</span>
-        <span class="fz-big" id="v-ahorro">—</span>
-        <span class="fz-note">Meta: <span id="v-meta">—</span> al 30 de junio de 2027</span>
-        <div class="fz-meter"><i id="m-ahorro"></i></div>
-        <span class="go">Ver ahorro →</span>
-      </a>
-      <a class="fz-card fz-c-sky" href="#ahorro">
-        <span class="fz-label">Frente al plan</span>
-        <span class="fz-big" id="v-dif">—</span>
-        <span class="fz-note">A hoy el plan era <span id="v-esperado">—</span></span>
-      </a>
       <a class="fz-card fz-c-sun" href="#presupuesto" data-bolsa="Nueva York">
         <span class="fz-label">Fondo imprevistos</span>
         <span class="fz-big" id="v-fondo">—</span>
-        <span class="fz-note">De <span id="v-fondo-ini">—</span> · usado <span id="v-fondo-usado">—</span></span>
+        <span class="fz-note">de <span id="v-fondo-ini">—</span> · usado <span id="v-fondo-usado">—</span></span>
         <div class="fz-meter"><i id="m-fondo"></i></div>
       </a>
       <a class="fz-card fz-c-coral" href="#presupuesto" data-bolsa="Nueva York">
@@ -114,6 +100,11 @@ html.locked .lock { display: grid !important; place-items: center; position: fix
         <span class="fz-big" id="v-deuda">—</span>
         <span class="fz-note">de <span id="v-pres-papa">—</span> · lo que devuelves</span>
         <div class="fz-meter"><i id="m-papa"></i></div>
+      </a>
+      <a class="fz-card fz-c-sky" href="#ahorro">
+        <span class="fz-label">Plan a hoy</span>
+        <span class="fz-big" id="v-esperado">—</span>
+        <span class="fz-note">lo que el plan esperaba ahorrado hoy</span>
       </a>
     </div>
 
