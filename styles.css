@@ -48,7 +48,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 @media (max-width: 720px) {
   .tabs { display: none; }
   .bottomnav {
-    display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; inset: auto 0 0; z-index: 10;
+    display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; inset: auto 0 0; z-index: 10;
     background: color-mix(in srgb, var(--panel) 92%, transparent); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px);
     border-top: 1px solid var(--line);
     padding: 6px max(8px, env(safe-area-inset-right, 0px)) max(8px, env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px));
@@ -262,4 +262,116 @@ html.locked body { overflow: hidden; }
   @keyframes shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
   .lock.open { animation: fadeOut .26s forwards; }
   @keyframes fadeOut { to { opacity: 0; transform: scale(1.03); } }
+}
+
+/* ---------- registrar movimientos ---------- */
+.add-btn {
+  margin-left: 6px; border: none; cursor: pointer; padding: 8px 16px; border-radius: 999px;
+  background: var(--sky); color: var(--panel); font: 600 15px var(--f-body); white-space: nowrap;
+  transition: transform .15s, box-shadow .15s;
+}
+.add-btn:hover { box-shadow: 0 6px 16px -8px var(--sky); transform: translateY(-1px); }
+.add-btn:active { transform: scale(.97); }
+.nav-add { display: none; }
+@media (max-width: 720px) {
+  .add-btn { display: none; }
+  .bottomnav .nav-add {
+    display: grid; place-items: center; border: none; background: none; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  .nav-add i {
+    display: grid; place-items: center; width: 50px; height: 50px; margin-top: -16px; border-radius: 50%;
+    background: var(--sky); color: var(--panel); box-shadow: 0 8px 18px -8px var(--sky), 0 0 0 4px var(--bg);
+    transition: transform .12s;
+  }
+  .nav-add:active i { transform: scale(.92); }
+  .bottomnav .nav-add svg { width: 26px; height: 26px; stroke-width: 2.6; }
+}
+
+.item.tap { cursor: pointer; transition: border-color .15s, transform .12s; -webkit-tap-highlight-color: transparent; }
+.item.tap:hover { border-color: color-mix(in srgb, var(--sky) 45%, var(--line)); }
+.item.tap:active { transform: scale(.985); }
+
+.sheet {
+  border: none; padding: 0; color: var(--fg); background: var(--panel);
+  width: min(480px, calc(100% - 32px)); max-width: none; max-height: calc(100dvh - 48px);
+  border-radius: 22px; box-shadow: 0 24px 60px -20px rgb(0 0 0 / .45); overflow: auto; overscroll-behavior: contain;
+}
+.sheet::backdrop { background: rgb(10 12 18 / .45); }
+@media (prefers-reduced-motion: no-preference) {
+  .sheet[open] { animation: sheetIn .28s cubic-bezier(.2, .8, .2, 1); }
+  @keyframes sheetIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+}
+@media (max-width: 720px) {
+  .sheet { width: 100%; margin: auto 0 0; max-height: 92dvh; border-radius: 22px 22px 0 0; }
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes sheetIn { from { transform: translateY(100%); } to { transform: none; } }
+  }
+}
+.sheet form { display: grid; gap: 16px; padding: 18px max(18px, env(safe-area-inset-left, 0px)) max(20px, env(safe-area-inset-bottom, 0px)); }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.sheet-head h2 { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: 22px; }
+.x { width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer; font-size: 15px; color: var(--muted); background: color-mix(in srgb, var(--fg) 7%, transparent); }
+.f-body { display: grid; gap: 16px; }
+.f-body[hidden], .connect[hidden] { display: none; }
+
+.fld { display: grid; gap: 6px; min-width: 0; }
+.fld > span, .fld > label, .fld-top label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.fld small { text-transform: none; letter-spacing: 0; font-weight: 500; }
+.fld[hidden] { display: none; }
+.fld-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.fld input, .fld select {
+  width: 100%; min-width: 0; min-height: 46px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line);
+  background: var(--bg); color: var(--fg); font: 16px var(--f-body); -webkit-appearance: none; appearance: none;
+}
+.fld select {
+  padding-right: 34px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%; background-size: 5px 5px; background-repeat: no-repeat;
+}
+.fld input:focus, .fld select:focus { outline: none; border-color: var(--sky); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sky) 25%, transparent); }
+.amount { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.amount input { font: 700 28px var(--f-display); font-variant-numeric: tabular-nums; min-height: 56px; }
+.conv { margin: 0; min-height: 18px; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; padding: 4px; border-radius: 13px; background: color-mix(in srgb, var(--fg) 7%, transparent); }
+.seg label { position: relative; }
+.seg input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+.seg span { display: block; text-align: center; padding: 9px 12px; border-radius: 10px; font-weight: 600; color: var(--muted); transition: background .15s, color .15s; }
+.seg input:checked + span { background: var(--panel); color: var(--fg); box-shadow: 0 1px 4px rgb(0 0 0 / .14); }
+.seg input:focus-visible + span { outline: 3px solid color-mix(in srgb, var(--sky) 70%, transparent); }
+.seg-tipo input[value="gasto"]:checked + span { color: var(--coral); }
+.seg-tipo input[value="ahorro"]:checked + span { color: var(--mint); }
+.seg-sm span { padding: 8px 10px; font-size: 14px; }
+
+.check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); cursor: pointer; }
+.check[hidden] { display: none; }
+.check input { width: 18px; height: 18px; accent-color: var(--sky); }
+.f-msg { margin: 0; font-size: 14px; color: var(--muted); }
+.f-msg:empty { display: none; }
+.f-msg.bad { color: var(--coral); font-weight: 600; }
+.sheet-actions { display: flex; gap: 10px; }
+.btn { font: 600 16px var(--f-body); padding: 13px 18px; border-radius: 13px; border: 1px solid transparent; cursor: pointer; }
+.btn.primary { flex: 1; background: var(--coral); color: var(--panel); }
+.btn.primary.is-ahorro { background: var(--mint); }
+#c-guardar.btn.primary { background: var(--fg); color: var(--bg); }
+.btn.danger { background: transparent; color: var(--coral); border-color: color-mix(in srgb, var(--coral) 45%, var(--line)); }
+.btn:disabled { opacity: .55; cursor: progress; }
+.mini { border: none; background: none; padding: 0; cursor: pointer; color: var(--sky); font: 600 12.5px var(--f-body); text-transform: none; letter-spacing: 0; }
+.mini.muted { justify-self: center; color: var(--muted); font-weight: 500; }
+
+.connect { display: grid; gap: 12px; font-size: 14.5px; }
+.connect p { margin: 0; }
+.connect ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.connect a { color: var(--sky); font-weight: 600; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 28px; z-index: 60; transform: translateX(-50%);
+  padding: 10px 18px; border-radius: 999px; background: var(--fg); color: var(--bg); font-weight: 600; font-size: 14.5px;
+  box-shadow: 0 10px 24px -10px rgb(0 0 0 / .5); white-space: nowrap;
+}
+@media (max-width: 720px) { .toast { bottom: calc(var(--nav-h) + 24px + env(safe-area-inset-bottom, 0px)); } }
+@media (prefers-reduced-motion: no-preference) {
+  .toast.show { animation: toastIn .25s cubic-bezier(.2, .8, .2, 1); }
+  @keyframes toastIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translateX(-50%); } }
 }

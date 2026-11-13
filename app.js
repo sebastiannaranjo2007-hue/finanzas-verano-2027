@@ -149,7 +149,9 @@
   }
 
   function itemMov(m, i) {
-    const card = el('div', 'item pop'); card.style.animationDelay = Math.min(i, 10) * 30 + 'ms';
+    const card = el('div', 'item pop tap'); card.style.animationDelay = Math.min(i, 10) * 30 + 'ms';
+    card.dataset.id = m.id; card.tabIndex = 0; card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', 'Corregir ' + (TIPOS[m.tipo] || m.tipo).toLowerCase() + ': ' + m.concepto + ', ' + usd(n(m.usd)) + ', ' + fDate(m.fecha));
     card.appendChild(el('div', 'it-date', fDate(m.fecha)));
     const side = el('div', 'it-side'); side.appendChild(el('span', 'fz-pill ' + (m.tipo === 'gasto' ? 'info' : 'ok'), TIPOS[m.tipo] || m.tipo)); card.appendChild(side);
     const tt = el('div', 'it-full it-title', m.concepto); if (m.detalle) tt.appendChild(el('span', 'it-sub', m.detalle)); card.appendChild(tt);
@@ -357,8 +359,230 @@
   document.querySelectorAll('#chips-mov .chip').forEach((c) => c.addEventListener('click', () => { state.filtro = c.dataset.f; renderMovimientos(); }));
   show(current(), true);
 
+  // ---------- GitHub: guardar cambios en el repositorio ----------
+  // La app escribe directo en data/*.csv con la API de GitHub. Cada cambio queda como un commit.
+  // El token (fine-grained, solo este repo, Contents: read and write) se guarda en este dispositivo.
+  const REPO = 'sebastiannaranjo2007-hue/finanzas-verano-2027', BRANCH = 'main', TOKEN_KEY = 'nyc-gh-token';
+  const b64dec = (s) => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g, '')), (c) => c.charCodeAt(0)));
+  const b64enc = (text) => { const b = new TextEncoder().encode(text); let s = ''; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(s); };
+  const gh = {
+    token() { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; } },
+    setToken(t) { try { if (t) localStorage.setItem(TOKEN_KEY, t); else localStorage.removeItem(TOKEN_KEY); } catch (e) {} },
+    async req(path, method, body, token) {
+      const url = 'https://api.github.com/repos/' + REPO + '/contents/' + path + (method ? '' : '?ref=' + BRANCH + '&t=' + Date.now());
+      const headers = {Authorization: 'Bearer ' + (token || gh.token()), Accept: 'application/vnd.github+json'};
+      if (body) headers['Content-Type'] = 'application/json';
+      const r = await fetch(url, {method: method || 'GET', headers, body: body ? JSON.stringify(body) : undefined});
+      if (!r.ok) { const e = new Error('GitHub ' + r.status); e.status = r.status; throw e; }
+      return r.json();
+    },
+    async read(path, token) { const j = await gh.req(path, null, null, token); return {sha: j.sha, text: b64dec(j.content)}; },
+    // Lee el archivo, le aplica fn y lo sube. Si alguien lo cambió entre medio (409), lo intenta otra vez.
+    async update(path, fn, message) {
+      for (let i = 0; ; i++) {
+        const f = await gh.read(path); const next = fn(f.text);
+        try { await gh.req(path, 'PUT', {message, content: b64enc(next), sha: f.sha, branch: BRANCH}); return next; }
+        catch (e) { if (e.status !== 409 || i > 0) throw e; }
+      }
+    }
+  };
+  const headOf = (text) => text.replace(/^﻿/, '').split(/\r?\n/)[0].split(',').map((h) => h.trim());
+  const csvCell = (v) => { v = String(v == null ? '' : v); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+  const toCSV = (head, rows) => [head.join(','), ...rows.map((r) => head.map((h) => csvCell(r[h])).join(','))].join('\n') + '\n';
+  const hoyISO = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  // "1.200.000" → 1200000 en pesos; "45,49" o "45.49" → 45.49 en dólares
+  const parseMonto = (s, moneda) => { s = String(s || '').trim(); if (moneda === 'COP') return n(s.replace(/[^\d]/g, '')); return n(s.replace(/[^\d.,]/g, '').replace(',', '.')); };
+  const parseTrm = (s) => { s = String(s || '').trim().replace(/[^\d.,]/g, ''); if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.'); return n(s); };
+
+  // ---------- formulario de movimientos ----------
+  const raw = {};
+  const f = {editing: null, busy: false};
+  const sheet = $('sheet');
+  const tipo = () => (document.querySelector('input[name="tipo"]:checked') || {}).value || 'gasto';
+  const moneda = () => (document.querySelector('input[name="moneda"]:checked') || {}).value || 'COP';
+  const setRadio = (name, v) => { const r = document.querySelector('input[name="' + name + '"][value="' + v + '"]'); if (r) r.checked = true; };
+  const tasaApp = () => n((raw.parametros && raw.parametros[0] || {}).tasa_cop_usd);
+  const msg = (id, text, bad) => { const m = $(id); m.textContent = text || ''; m.classList.toggle('bad', !!bad); };
+
+  function fillConceptos() {
+    const sel = $('f-concepto'); sel.replaceChildren();
+    const vistos = new Set(); const grupos = new Map();
+    (raw.presupuesto || []).forEach((p) => {
+      const c = p.cuenta || p.concepto; if (vistos.has(c)) return; vistos.add(c);
+      if (!grupos.has(p.bolsa)) grupos.set(p.bolsa, []); grupos.get(p.bolsa).push(c);
+    });
+    const otros = [...new Set((raw.movimientos || []).filter((m) => m.tipo === 'gasto' && !vistos.has(m.concepto)).map((m) => m.concepto))];
+    grupos.forEach((cs, b) => { const g = el('optgroup'); g.label = TITULO[b] || b; cs.forEach((c) => { const o = el('option', null, c); o.value = c; g.appendChild(o); }); sel.appendChild(g); });
+    const g = el('optgroup'); g.label = 'Otro (sale del fondo)';
+    otros.forEach((c) => { const o = el('option', null, c); o.value = c; g.appendChild(o); });
+    const o = el('option', null, 'Otra cosa…'); o.value = '__otro'; g.appendChild(o); sel.appendChild(g);
+  }
+
+  function syncForm() {
+    const esGasto = tipo() === 'gasto';
+    $('fld-concepto').hidden = !esGasto;
+    $('fld-otro').hidden = !esGasto || $('f-concepto').value !== '__otro';
+    const mon = moneda(), monto = parseMonto($('f-monto').value, mon), trm = parseTrm($('f-trm').value);
+    $('f-monto').placeholder = mon === 'COP' ? '150.000' : '45,49';
+    if (monto > 0 && trm > 0) {
+      const u = mon === 'USD' ? monto : r2(monto / trm), c = mon === 'COP' ? monto : Math.round(monto * trm);
+      $('f-conv').textContent = (mon === 'COP' ? '≈ ' + usd(u) : '≈ ' + cop(c)) + ' con TRM ' + trm.toLocaleString('es-CO', {minimumFractionDigits: 2});
+    } else $('f-conv').textContent = '';
+    const cambia = trm > 0 && Math.abs(trm - tasaApp()) > 0.004;
+    $('fld-trm-save').hidden = !cambia || !!f.editing;
+    $('f-guardar').classList.toggle('is-ahorro', !esGasto);
+  }
+
+  function openSheet(m) {
+    if (!state.data) return;
+    f.editing = m || null;
+    fillConceptos();
+    const conectado = !!gh.token();
+    $('f-connect').hidden = conectado; $('f-body').hidden = !conectado;
+    setText('sheet-title', !conectado ? 'Conectar con GitHub' : m ? 'Corregir movimiento' : 'Nuevo movimiento');
+    msg('f-msg'); msg('c-msg'); $('f-token').value = '';
+    if (m) {
+      setRadio('tipo', m.tipo); setRadio('moneda', m.moneda === 'USD' ? 'USD' : 'COP');
+      $('f-monto').value = m.moneda === 'USD' ? String(n(m.monto)).replace('.', ',') : Math.round(n(m.monto)).toLocaleString('es-CO');
+      const trm = n(m.usd) ? n(m.cop) / n(m.usd) : tasaApp();
+      $('f-trm').value = r2(trm).toLocaleString('es-CO', {minimumFractionDigits: 2});
+      $('f-fecha').value = m.fecha; $('f-detalle').value = m.detalle || ''; $('f-otro').value = '';
+      if (m.tipo === 'gasto') $('f-concepto').value = m.concepto;
+    } else {
+      setRadio('tipo', 'gasto'); setRadio('moneda', 'COP');
+      $('f-monto').value = ''; $('f-detalle').value = ''; $('f-otro').value = ''; $('f-fecha').value = hoyISO();
+      $('f-trm').value = tasaApp().toLocaleString('es-CO', {minimumFractionDigits: 2});
+      $('f-concepto').value = 'Comida';
+      if (!$('f-concepto').value) $('f-concepto').selectedIndex = 0;
+    }
+    $('f-trm-save').checked = true;
+    $('f-borrar').hidden = !m;
+    syncForm();
+    if (!sheet.open) sheet.showModal();
+    if (!conectado) setTimeout(() => $('f-token').focus(), 50);
+    else if (!m && matchMedia('(hover: hover)').matches) setTimeout(() => $('f-monto').focus(), 50);
+  }
+  const closeSheet = () => { if (sheet.open) sheet.close(); };
+
+  function errorTexto(e) {
+    if (e.status === 401) return 'GitHub no aceptó el token. Puede que se haya vencido: toca "Cambiar token".';
+    if (e.status === 403 || e.status === 404) return 'El token no tiene permiso para escribir en el repositorio. Revisa que tenga "Contents: Read and write" y acceso a finanzas-verano-2027.';
+    if (e.status === 409 || e.status === 422) return 'El archivo cambió mientras guardabas. Intenta otra vez.';
+    if (e.message === 'no-existe') return 'Ese movimiento ya no está en el archivo. Recarga la página.';
+    return 'No se pudo guardar (' + (e.message || 'sin conexión') + '). Revisa tu conexión e intenta otra vez.';
+  }
+  function busy(on) { f.busy = on; ['f-guardar', 'f-borrar', 'c-guardar'].forEach((id) => { $(id).disabled = on; }); }
+  function toast(text) {
+    const t = $('toast'); t.textContent = text; t.hidden = false;
+    t.classList.remove('show'); void t.offsetWidth; t.classList.add('show');
+    clearTimeout(toast.timer); toast.timer = setTimeout(() => { t.hidden = true; }, 2800);
+  }
+
+  async function guardar(ev) {
+    ev.preventDefault(); if (f.busy) return;
+    const tp = tipo(), mon = moneda();
+    const monto = parseMonto($('f-monto').value, mon), trm = parseTrm($('f-trm').value), fecha = $('f-fecha').value;
+    let concepto = tp === 'ahorro' ? 'Ahorro' : $('f-concepto').value;
+    if (concepto === '__otro') concepto = $('f-otro').value.trim();
+    if (!(monto > 0)) return msg('f-msg', 'Escribe el monto.', true);
+    if (!(trm > 0)) return msg('f-msg', 'Escribe la TRM.', true);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return msg('f-msg', 'Escoge la fecha.', true);
+    if (!concepto) return msg('f-msg', 'Escribe qué fue el gasto.', true);
+    const pres = (raw.presupuesto || []).find((p) => (p.cuenta || p.concepto) === concepto);
+    const row = {
+      fecha, tipo: tp, grupo: tp === 'ahorro' ? 'Ahorro' : (pres ? pres.bolsa : 'Otro'), concepto,
+      detalle: $('f-detalle').value.trim() || (tp === 'ahorro' ? (mon === 'USD' ? 'Ahorro en dólares' : 'Ahorro en pesos') : ''),
+      moneda: mon, monto: String(monto),
+      usd: String(mon === 'USD' ? monto : r2(monto / trm)), cop: String(mon === 'COP' ? monto : Math.round(monto * trm))
+    };
+    const ed = f.editing;
+    const resumen = (tp === 'ahorro' ? 'ahorro' : 'gasto') + ' ' + (tp === 'ahorro' ? '' : concepto + ', ') + (mon === 'USD' ? 'US$' + monto : cop(monto)) + ' (' + fecha + ')';
+    const mensaje = ed ? 'Corregir movimiento ' + ed.id + ': ' + resumen : 'Registrar ' + resumen;
+    const guardarTrm = !$('fld-trm-save').hidden && $('f-trm-save').checked;
+    busy(true); msg('f-msg', 'Guardando en GitHub…');
+    try {
+      const text = await gh.update('data/movimientos.csv', (t) => {
+        const head = headOf(t), rows = parseCSV(t);
+        if (ed) {
+          const i = rows.findIndex((r) => r.id === ed.id); if (i < 0) throw new Error('no-existe');
+          rows[i] = {...rows[i], ...row};
+        } else rows.push({id: String(rows.reduce((mx, r) => Math.max(mx, n(r.id)), 0) + 1), ...row});
+        return toCSV(head, rows);
+      }, mensaje);
+      raw.movimientos = parseCSV(text);
+      if (guardarTrm) {
+        const p = await gh.update('data/parametros.csv', (t) => {
+          const head = headOf(t), rows = parseCSV(t);
+          rows[0] = {...rows[0], tasa_cop_usd: String(r2(trm)), fecha_tasa: hoyISO()};
+          return toCSV(head, rows);
+        }, 'Actualizar TRM a ' + r2(trm) + ' (' + hoyISO() + ')');
+        raw.parametros = parseCSV(p);
+      }
+      refresh(); closeSheet(); toast(ed ? 'Movimiento corregido' : (tp === 'ahorro' ? 'Ahorro registrado' : 'Gasto registrado'));
+    } catch (e) { console.error(e); msg('f-msg', errorTexto(e), true); }
+    finally { busy(false); }
+  }
+
+  async function borrar() {
+    const ed = f.editing; if (!ed || f.busy) return;
+    if (!confirm('¿Borrar "' + ed.concepto + '" de ' + usd(n(ed.usd)) + ' del ' + fDate(ed.fecha) + '?')) return;
+    busy(true); msg('f-msg', 'Borrando…');
+    try {
+      const text = await gh.update('data/movimientos.csv', (t) => {
+        const head = headOf(t), rows = parseCSV(t);
+        if (!rows.some((r) => r.id === ed.id)) throw new Error('no-existe');
+        return toCSV(head, rows.filter((r) => r.id !== ed.id));
+      }, 'Borrar movimiento ' + ed.id + ': ' + ed.concepto + ' (' + ed.fecha + ')');
+      raw.movimientos = parseCSV(text);
+      refresh(); closeSheet(); toast('Movimiento borrado');
+    } catch (e) { console.error(e); msg('f-msg', errorTexto(e), true); }
+    finally { busy(false); }
+  }
+
+  async function conectar() {
+    const t = $('f-token').value.trim(); if (f.busy) return;
+    if (!t) return msg('c-msg', 'Pega el token.', true);
+    busy(true); msg('c-msg', 'Probando el token…');
+    try {
+      const file = await gh.read('data/movimientos.csv', t);
+      gh.setToken(t); raw.movimientos = parseCSV(file.text); refresh();
+      openSheet(f.editing); toast('Conectado con GitHub');
+    } catch (e) {
+      msg('c-msg', e.status === 401 ? 'GitHub no reconoce ese token. Cópialo otra vez.' : e.status === 403 || e.status === 404 ? 'El token no tiene acceso a finanzas-verano-2027.' : 'No se pudo probar el token. Revisa tu conexión.', true);
+    } finally { busy(false); }
+  }
+
+  async function traerTrm() {
+    msg('f-msg', 'Buscando la TRM de hoy…');
+    try {
+      const r = await fetch('https://www.datos.gov.co/resource/32sa-8pi3.json?$limit=1&$order=vigenciadesde%20DESC');
+      const j = await r.json(); const v = n(j[0] && j[0].valor); if (!v) throw new Error();
+      $('f-trm').value = r2(v).toLocaleString('es-CO', {minimumFractionDigits: 2}); msg('f-msg'); syncForm();
+    } catch (e) { msg('f-msg', 'No se pudo traer la TRM. Escríbela a mano.', true); }
+  }
+
+  document.querySelectorAll('[data-add]').forEach((b) => b.addEventListener('click', () => openSheet(null)));
+  document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', closeSheet));
+  sheet.addEventListener('click', (e) => { if (e.target === sheet) closeSheet(); });
+  $('f-mov').addEventListener('submit', guardar);
+  $('f-mov').addEventListener('input', syncForm);
+  $('f-mov').addEventListener('change', syncForm);
+  $('f-borrar').addEventListener('click', borrar);
+  $('c-guardar').addEventListener('click', conectar);
+  $('f-token').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); conectar(); } });
+  $('f-trm-hoy').addEventListener('click', traerTrm);
+  $('f-token-change').addEventListener('click', () => { if (confirm('¿Quitar el token de este dispositivo y pegar uno nuevo?')) { gh.setToken(''); openSheet(f.editing); } });
+  // tocar un movimiento lo abre para corregirlo
+  ['l-recientes', 'l-movimientos'].forEach((id) => {
+    const box = $(id);
+    const pick = (e) => { const c = e.target.closest('[data-id]'); if (!c || !state.data) return; const m = state.data.movimientos.find((x) => x.id === c.dataset.id); if (m) openSheet(m); };
+    box.addEventListener('click', pick);
+    box.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(e); } });
+  });
+
   // ---------- arranque ----------
-  Promise.all(['presupuesto', 'movimientos', 'plan', 'parametros'].map(load)).then(([presupuesto, movimientos, plan, parametros]) => {
+  function refresh() {
+    const {presupuesto, movimientos, plan, parametros} = raw;
     const filas = porConcepto(presupuesto, movimientos);
     const serie = serieAhorro(movimientos);
     const t = totales(filas, movimientos, plan, parametros);
@@ -369,7 +593,13 @@
     renderBolsa();
     renderMovimientos();
     show(current(), true);
+  }
+  // Con token, los datos que cambian se leen directo de GitHub (al instante); sin token, de la página publicada.
+  const loadFresh = (name) => gh.token() ? gh.read('data/' + name + '.csv').then((x) => parseCSV(x.text)).catch(() => load(name)) : load(name);
+  Promise.all([load('presupuesto'), loadFresh('movimientos'), load('plan'), loadFresh('parametros')]).then(([presupuesto, movimientos, plan, parametros]) => {
+    Object.assign(raw, {presupuesto, movimientos, plan, parametros});
+    refresh();
     let w = 0;
-    window.addEventListener('resize', () => { const c = $('chart'); if (!c || c.offsetParent === null) return; if (c.clientWidth !== w) { w = c.clientWidth; renderChart(serie, plan); } });
+    window.addEventListener('resize', () => { const c = $('chart'); if (!c || c.offsetParent === null || !state.data) return; if (c.clientWidth !== w) { w = c.clientWidth; renderChart(state.data.serie, state.data.plan); } });
   }).catch((err) => { console.error(err); $('error').hidden = false; });
 })();

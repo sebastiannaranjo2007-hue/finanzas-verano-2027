@@ -23,7 +23,7 @@ html.locked body > :not(.lock) { display: none !important; }
 html.locked .lock { display: grid !important; place-items: center; position: fixed; inset: 0; z-index: 100; }
 .lock { display: none; }
 </style>
-<link rel="stylesheet" href="styles.css?v=20261112b">
+<link rel="stylesheet" href="styles.css?v=20261113">
 <script src="lock.js?v=20261112b"></script>
 </head>
 <body>
@@ -53,6 +53,7 @@ html.locked .lock { display: grid !important; place-items: center; position: fix
       <a href="#presupuesto" data-tab="presupuesto">Presupuesto</a>
       <a href="#ruta" data-tab="ruta">Ruta NYC</a>
     </nav>
+    <button type="button" class="add-btn" data-add>+ Registrar</button>
   </div>
 </header>
 
@@ -167,7 +168,7 @@ html.locked .lock { display: grid !important; place-items: center; position: fix
       <button type="button" class="chip" data-f="ahorro" aria-pressed="false">Ahorros</button>
     </div>
     <div class="cards cols" id="l-movimientos"></div>
-    <p class="fz-tip-box">Para registrar un gasto o un ahorro, cuéntaselo a Claude en el chat, o agrega una fila a <code>data/movimientos.csv</code> en el repositorio.</p>
+    <p class="fz-tip-box">Toca un movimiento para corregirlo o borrarlo. Para uno nuevo, usa <b>+ Registrar</b>. Cada cambio queda guardado en GitHub, en <code>data/movimientos.csv</code>.</p>
   </section>
 
   <!-- RUTA -->
@@ -188,9 +189,69 @@ html.locked .lock { display: grid !important; place-items: center; position: fix
 <nav class="bottomnav" aria-label="Secciones">
   <a href="#resumen" data-tab="resumen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg><span>Resumen</span></a>
   <a href="#ahorro" data-tab="ahorro"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18 9.5 12l3.5 3.5L20 8M15 8h5v5"/></svg><span>Ahorro</span></a>
+  <button type="button" class="nav-add" data-add aria-label="Registrar un gasto o un ahorro"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></i></button>
   <a href="#presupuesto" data-tab="presupuesto"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="6" width="17" height="13" rx="2.5"/><path d="M3.5 10h17M15 14.5h2.5"/></svg><span>Presupuesto</span></a>
   <a href="#ruta" data-tab="ruta"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg><span>Ruta NYC</span></a>
 </nav>
-<script src="app.js?v=20261112b"></script>
+
+<dialog class="sheet" id="sheet" aria-labelledby="sheet-title">
+  <form id="f-mov" novalidate>
+    <div class="sheet-head">
+      <h2 id="sheet-title">Nuevo movimiento</h2>
+      <button type="button" class="x" data-close aria-label="Cerrar">✕</button>
+    </div>
+
+    <div id="f-connect" class="connect" hidden>
+      <p>Para guardar desde la app, conéctala con GitHub una vez en este dispositivo.</p>
+      <ol>
+        <li>Abre <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Crear token en GitHub</a>.</li>
+        <li><b>Token name:</b> NYC app. <b>Expiration:</b> la más larga que te deje.</li>
+        <li><b>Repository access:</b> Only select repositories → <b>finanzas-verano-2027</b>.</li>
+        <li><b>Permissions → Repository permissions → Contents:</b> Read and write.</li>
+        <li><b>Generate token</b>, cópialo y pégalo aquí.</li>
+      </ol>
+      <label class="fld"><span>Token</span><input id="f-token" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_…"></label>
+      <p class="f-msg" id="c-msg" role="status" aria-live="polite"></p>
+      <div class="sheet-actions"><button type="button" class="btn primary" id="c-guardar">Conectar</button></div>
+    </div>
+
+    <div id="f-body" class="f-body">
+      <div class="seg seg-tipo" role="radiogroup" aria-label="Tipo">
+        <label><input type="radio" name="tipo" value="gasto" checked><span>Gasto</span></label>
+        <label><input type="radio" name="tipo" value="ahorro"><span>Ahorro</span></label>
+      </div>
+      <div class="fld">
+        <label for="f-monto">Monto</label>
+        <div class="amount">
+          <input id="f-monto" inputmode="decimal" autocomplete="off" placeholder="0">
+          <div class="seg seg-sm" role="radiogroup" aria-label="Moneda">
+            <label><input type="radio" name="moneda" value="COP" checked><span>COP</span></label>
+            <label><input type="radio" name="moneda" value="USD"><span>USD</span></label>
+          </div>
+        </div>
+        <p class="conv" id="f-conv"></p>
+      </div>
+      <label class="fld" id="fld-concepto"><span>Concepto</span><select id="f-concepto"></select></label>
+      <label class="fld" id="fld-otro" hidden><span>¿Qué fue?</span><input id="f-otro" autocomplete="off" placeholder="Ej.: Lavandería"></label>
+      <label class="fld"><span>Detalle <small>opcional</small></span><input id="f-detalle" autocomplete="off" placeholder="Ej.: Pago a SEI"></label>
+      <div class="row2">
+        <label class="fld"><span>Fecha</span><input type="date" id="f-fecha"></label>
+        <div class="fld">
+          <div class="fld-top"><label for="f-trm">TRM</label><button type="button" class="mini" id="f-trm-hoy">Traer la de hoy</button></div>
+          <input id="f-trm" inputmode="decimal" autocomplete="off">
+        </div>
+      </div>
+      <label class="check" id="fld-trm-save" hidden><input type="checkbox" id="f-trm-save" checked> Usar esta TRM en toda la app</label>
+      <p class="f-msg" id="f-msg" role="status" aria-live="polite"></p>
+      <div class="sheet-actions">
+        <button type="button" class="btn danger" id="f-borrar" hidden>Borrar</button>
+        <button type="submit" class="btn primary" id="f-guardar">Guardar</button>
+      </div>
+      <button type="button" class="mini muted" id="f-token-change">Cambiar token de GitHub</button>
+    </div>
+  </form>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<script src="app.js?v=20261113"></script>
 </body>
 </html>

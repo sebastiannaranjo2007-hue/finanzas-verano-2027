@@ -32,7 +32,18 @@ data/
 
 ## Cómo registrar un gasto o un ahorro
 
-Agrega una fila al final de `data/movimientos.csv` y sube el cambio (en GitHub: abre el archivo → ícono del lápiz → editar → *Commit changes*).
+**Desde la app:** toca **+** (en el celular, el botón del centro de la barra de abajo; en el computador, **+ Registrar** arriba). Para corregir o borrar un movimiento, tócalo en la lista. La app guarda el cambio directamente en `data/movimientos.csv` con la API de GitHub, y cada cambio queda como un commit. Si cambias la TRM y marcas "Usar esta TRM en toda la app", también se actualiza `data/parametros.csv`.
+
+La primera vez en cada dispositivo, la app pide un token de GitHub:
+
+1. Entra a <https://github.com/settings/personal-access-tokens/new>.
+2. **Repository access:** *Only select repositories* → `finanzas-verano-2027`.
+3. **Permissions → Repository permissions → Contents:** *Read and write*. No necesita nada más.
+4. *Generate token*, cópialo y pégalo en la app.
+
+El token queda guardado solo en ese navegador. Si se vence o se pierde el teléfono, bórralo en GitHub (misma página de tokens) y crea otro. Con el token puesto, la app lee los movimientos directo de GitHub, así que los cambios se ven al instante aunque GitHub Pages tarde un minuto en actualizarse.
+
+**A mano:** agrega una fila al final de `data/movimientos.csv` y sube el cambio (en GitHub: abre el archivo → ícono del lápiz → editar → *Commit changes*).
 
 ```
 id,fecha,tipo,grupo,concepto,detalle,moneda,monto,usd,cop
