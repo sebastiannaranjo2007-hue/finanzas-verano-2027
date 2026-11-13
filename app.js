@@ -121,8 +121,8 @@
   const COLOR = {'Préstamo': 'var(--grape)', 'Nueva York': 'var(--coral)', 'Sueldo en Cedar Point': 'var(--sun)'};
   const PILL = {'Te pasaste': 'bad', 'Del fondo': 'warn', 'Pagado': 'ok', 'En curso': 'ok'};
   const TIPOS = {gasto: 'Gasto', ahorro: 'Ahorro'};
-  const state = {bolsa: 'Nueva York', filtro: 'todos', data: null, cur: 'cop'};
-  try { const c = localStorage.getItem('nyc-cur'); if (c === 'usd' || c === 'cop') state.cur = c; } catch (e) {}
+  const state = {bolsa: 'Nueva York', filtro: 'todos', data: null, cur: 'usd'};
+  try { const c = localStorage.getItem('nyc-cur2'); if (c === 'usd' || c === 'cop') state.cur = c; } catch (e) {}
 
   function renderResumen(t) {
     setText('v-tasa', t.tasa.toLocaleString('es-CO', {minimumFractionDigits: 2}));
@@ -365,7 +365,7 @@
   document.querySelectorAll('a[data-bolsa]').forEach((a) => a.addEventListener('click', () => { state.bolsa = a.dataset.bolsa; if (state.data) renderBolsa(); }));
   document.querySelectorAll('#chips-mov .chip').forEach((c) => c.addEventListener('click', () => { state.filtro = c.dataset.f; renderMovimientos(); }));
   document.querySelectorAll('.cur [data-cur]').forEach((b) => b.addEventListener('click', () => {
-    state.cur = b.dataset.cur; try { localStorage.setItem('nyc-cur', state.cur); } catch (e) {}
+    state.cur = b.dataset.cur; try { localStorage.setItem('nyc-cur2', state.cur); } catch (e) {}
     if (state.data) renderResumen(state.data.t);
   }));
   show(current(), true);
@@ -432,6 +432,7 @@
   function syncForm() {
     const esGasto = tipo() === 'gasto';
     $('fld-concepto').hidden = !esGasto;
+    $('fld-destino').hidden = esGasto;
     $('fld-otro').hidden = !esGasto || $('f-concepto').value !== '__otro';
     const mon = moneda(), monto = parseMonto($('f-monto').value, mon), trm = parseTrm($('f-trm').value);
     $('f-monto').placeholder = mon === 'COP' ? '150.000' : '45,49';

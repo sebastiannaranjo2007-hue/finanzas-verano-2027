@@ -502,3 +502,4 @@ html.locked .lock { display: flex !important; flex-direction: column; overflow-y
 /* La barra superior ya incluye el espacio de la barra de estado del iPhone (padding-top);
    se pega en top: 0 para no dejar un hueco doble que tapaba los títulos. */
 .view { scroll-margin-top: 80px; }
+#fld-destino input{color:var(--mint);font-weight:600;pointer-events:none}

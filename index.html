@@ -22,8 +22,8 @@ html.locked body > :not(.lock) { display: none !important; }
 html.locked .lock { display: flex !important; flex-direction: column; overflow-y: auto; position: fixed; inset: 0; z-index: 100; }
 .lock { display: none; }
 </style>
-<link rel="stylesheet" href="styles.css?v=20261113c">
-<script src="lock.js?v=20261113c"></script>
+<link rel="stylesheet" href="styles.css?v=20261113d">
+<script src="lock.js?v=20261113d"></script>
 </head>
 <body>
 <div class="lock" id="lock" role="dialog" aria-modal="true" aria-labelledby="lock-title">
@@ -65,8 +65,8 @@ html.locked .lock { display: flex !important; flex-direction: column; overflow-y
       <div class="bal-top">
         <span class="bal-label">Ahorro para Nueva York</span>
         <div class="cur" role="group" aria-label="Moneda">
-          <button type="button" data-cur="cop" aria-pressed="true">COP</button>
-          <button type="button" data-cur="usd" aria-pressed="false">USD</button>
+          <button type="button" data-cur="cop" aria-pressed="false">COP</button>
+          <button type="button" data-cur="usd" aria-pressed="true">USD</button>
         </div>
       </div>
       <div class="bal-amount" id="bal-amount">—</div>
@@ -223,6 +223,7 @@ html.locked .lock { display: flex !important; flex-direction: column; overflow-y
         <p class="conv" id="f-conv"></p>
       </div>
       <label class="fld" id="fld-concepto"><span>Concepto</span><select id="f-concepto"></select></label>
+      <label class="fld" id="fld-destino" hidden><span>Va para</span><input value="Ahorro para Nueva York" readonly tabindex="-1"></label>
       <label class="fld" id="fld-otro" hidden><span>¿Qué fue?</span><input id="f-otro" autocomplete="off" placeholder="Ej.: Lavandería"></label>
       <label class="fld"><span>Detalle <small>opcional</small></span><input id="f-detalle" autocomplete="off" placeholder="Ej.: Pago a SEI"></label>
       <div class="row2">
@@ -243,6 +244,6 @@ html.locked .lock { display: flex !important; flex-direction: column; overflow-y
   </form>
 </dialog>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-<script src="app.js?v=20261113c"></script>
+<script src="app.js?v=20261113d"></script>
 </body>
 </html>
