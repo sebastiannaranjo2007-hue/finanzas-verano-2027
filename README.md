@@ -21,8 +21,10 @@ Cuatro secciones, con pestañas arriba en el computador y una barra abajo en el 
 ```
 index.html          la página
 favicon.svg         el ícono de la pestaña
-styles.css          el diseño (modo claro y oscuro)
+styles.css          el diseño (modo oscuro)
 app.js              las cuentas y el gráfico
+glass.css, glass.js efecto Liquid Glass: barra inferior con lente, botones que se iluminan y rebotan
+lock.js             pantalla de clave
 data/
   movimientos.csv   gastos y ahorros (aquí se agrega cada movimiento)
   presupuesto.csv   presupuesto por concepto y bolsa

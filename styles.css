@@ -36,26 +36,9 @@ body::before { content: none; }
 .tabs a:hover { color: var(--fg); background: color-mix(in srgb, var(--fg) 6%, transparent); }
 .tabs a[aria-current="page"] { background: var(--fg); color: var(--bg); }
 
-/* ---------- barra inferior (celular) ---------- */
-.bottomnav { display: none; }
-@media (max-width: 720px) {
-  .tabs { display: none; }
-  .bottomnav {
-    /* barra flotante: separada de los bordes, por encima de la raya de inicio del iPhone */
-    display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; position: fixed; z-index: 10;
-    left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px));
-    bottom: max(14px, calc(env(safe-area-inset-bottom, 0px) - 4px));
-    max-width: 480px; margin: 0 auto;
-    background: color-mix(in srgb, var(--panel) 86%, transparent); backdrop-filter: saturate(1.6) blur(18px); -webkit-backdrop-filter: saturate(1.6) blur(18px);
-    border: 1px solid color-mix(in srgb, var(--line) 80%, transparent); border-radius: 26px;
-    box-shadow: 0 12px 32px -12px rgb(0 0 0 / .35), 0 2px 6px rgb(0 0 0 / .06);
-    padding: 6px;
-  }
-  .bottomnav a { display: grid; justify-items: center; gap: 2px; padding: 6px 0; text-decoration: none; color: var(--muted); font-size: 11px; font-weight: 600; border-radius: 20px; transition: background .2s, color .2s; }
-  .bottomnav svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .bottomnav a[aria-current="page"] { color: var(--sky); background: color-mix(in srgb, var(--sky) 13%, transparent); }
-  .bottomnav a[aria-current="page"] svg { stroke-width: 2.4; }
-}
+/* ---------- barra inferior (celular): ver glass.css ---------- */
+.bottomnav, .nav-add { display: none; }
+@media (max-width: 720px) { .tabs { display: none; } }
 
 /* ---------- contenido ---------- */
 .fz {
@@ -270,20 +253,7 @@ html.locked body { overflow: hidden; }
 }
 .add-btn:hover { box-shadow: 0 6px 16px -8px var(--sky); transform: translateY(-1px); }
 .add-btn:active { transform: scale(.97); }
-.nav-add { display: none; }
-@media (max-width: 720px) {
-  .add-btn { display: none; }
-  .bottomnav .nav-add {
-    display: grid; place-items: center; border: none; background: none; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent;
-  }
-  .nav-add i {
-    display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%;
-    background: var(--sky); color: var(--panel); box-shadow: 0 6px 14px -6px var(--sky);
-    transition: transform .12s;
-  }
-  .nav-add:active i { transform: scale(.92); }
-  .bottomnav .nav-add svg { width: 26px; height: 26px; stroke-width: 2.6; }
-}
+@media (max-width: 720px) { .add-btn { display: none; } }
 
 .item.tap { cursor: pointer; transition: border-color .15s, transform .12s; -webkit-tap-highlight-color: transparent; }
 .item.tap:hover { border-color: color-mix(in srgb, var(--sky) 45%, var(--line)); }
@@ -379,8 +349,6 @@ body { background: var(--bg); }
 .topbar { background: color-mix(in srgb, var(--bg) 85%, transparent); border-bottom-color: var(--line); }
 .brand { font-family: var(--f-display); font-weight: 800; }
 .tabs a[aria-current="page"] { background: var(--lime); color: #0a0b0e; }
-.bottomnav { background: color-mix(in srgb, var(--panel) 94%, transparent); }
-.bottomnav a[aria-current="page"] { color: var(--lime); }
 .view-title { font-family: var(--f-display); font-weight: 800; letter-spacing: -.02em; }
 .fz-h2 { font-family: var(--f-display); font-weight: 700; }
 .fz-h2::before { width: 8px; height: 8px; }
@@ -464,7 +432,7 @@ html.locked .lock { background: radial-gradient(90% 60% at 50% 0%, color-mix(in 
   .fz-big { font-size: 22px; }
   .balance { padding: 20px 18px; }
 }
-.nav-add i, .add-btn { background: var(--lime) !important; color: #0a0b0e !important; }
+.add-btn { background: var(--lime) !important; color: #0a0b0e !important; }
 .sheet { background: var(--panel); color: var(--fg); border-color: var(--line); }
 
 #c-guardar.btn.primary { background: var(--lime); color: #0a0b0e; }

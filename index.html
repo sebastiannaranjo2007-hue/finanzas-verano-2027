@@ -22,8 +22,9 @@ html.locked body > :not(.lock) { display: none !important; }
 html.locked .lock { display: flex !important; flex-direction: column; overflow-y: auto; position: fixed; inset: 0; z-index: 100; }
 .lock { display: none; }
 </style>
-<link rel="stylesheet" href="styles.css?v=20261113e">
-<script src="lock.js?v=20261113e"></script>
+<link rel="stylesheet" href="styles.css?v=20261113f">
+<link rel="stylesheet" href="glass.css?v=20261113f">
+<script src="lock.js?v=20261113f"></script>
 </head>
 <body>
 <div class="lock" id="lock" role="dialog" aria-modal="true" aria-labelledby="lock-title">
@@ -178,11 +179,16 @@ html.locked .lock { display: flex !important; flex-direction: column; overflow-y
 </main>
 
 <nav class="bottomnav" aria-label="Secciones">
-  <a href="#resumen" data-tab="resumen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg><span>Resumen</span></a>
-  <a href="#ahorro" data-tab="ahorro"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18 9.5 12l3.5 3.5L20 8M15 8h5v5"/></svg><span>Ahorro</span></a>
-  <button type="button" class="nav-add" data-add aria-label="Registrar un gasto o un ahorro"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></i></button>
-  <a href="#presupuesto" data-tab="presupuesto"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="6" width="17" height="13" rx="2.5"/><path d="M3.5 10h17M15 14.5h2.5"/></svg><span>Presupuesto</span></a>
-  <a href="#ruta" data-tab="ruta"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg><span>Ruta NYC</span></a>
+  <div class="tabbar glass" id="tabbar">
+    <span class="lens" aria-hidden="true"><span class="lens-track"></span></span>
+    <div class="tab-row">
+      <a href="#resumen" data-tab="resumen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg><span>Resumen</span></a>
+      <a href="#ahorro" data-tab="ahorro"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18 9.5 12l3.5 3.5L20 8M15 8h5v5"/></svg><span>Ahorro</span></a>
+      <a href="#presupuesto" data-tab="presupuesto"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="6" width="17" height="13" rx="2.5"/><path d="M3.5 10h17M15 14.5h2.5"/></svg><span>Presupuesto</span></a>
+      <a href="#ruta" data-tab="ruta"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg><span>Ruta NYC</span></a>
+    </div>
+  </div>
+  <button type="button" class="nav-add glass" data-add aria-label="Registrar un gasto o un ahorro"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
 </nav>
 
 <dialog class="sheet" id="sheet" aria-labelledby="sheet-title">
@@ -244,6 +250,7 @@ html.locked .lock { display: flex !important; flex-direction: column; overflow-y
   </form>
 </dialog>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-<script src="app.js?v=20261113e"></script>
+<script src="app.js?v=20261113f"></script>
+<script src="glass.js?v=20261113f"></script>
 </body>
 </html>
