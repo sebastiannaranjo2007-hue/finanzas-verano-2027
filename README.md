@@ -2,6 +2,8 @@
 
 App web sencilla para seguir el ahorro, el presupuesto y los gastos del verano 2027 (Cedar Point y Nueva York). Es una página estática: HTML, CSS y JavaScript, sin servidor ni base de datos, pensada para publicarse gratis con GitHub Pages.
 
+**Documentación:** el objetivo de la app, cómo funciona por dentro y las decisiones tomadas están en [docs/](docs/README.md). Cada cambio queda anotado en el [registro de cambios](CHANGELOG.md).
+
 ## Qué muestra
 
 Cuatro secciones, con pestañas arriba en el computador y una barra abajo en el celular: **Resumen**, **Ahorro**, **Presupuesto** (una bolsa a la vez) y **Ruta NYC** (el plan día por día del 4 al 7 de agosto, con links a Google Maps). Los **Movimientos** se abren desde el Resumen con "Ver todos". Cada sección tiene su link: `#resumen`, `#ahorro`, `#presupuesto`, `#ruta`, `#movimientos`.

@@ -540,15 +540,19 @@
   }
 
   async function conectar() {
-    const t = $('f-token').value.trim(); if (f.busy) return;
+    // Un token no tiene espacios: quita saltos de línea, espacios y caracteres invisibles que se cuelan al copiar en el celular.
+    const t = $('f-token').value.replace(/[\s​-‍﻿]/g, ''); if (f.busy) return;
+    $('f-token').value = t;
     if (!t) return msg('c-msg', 'Pega el token.', true);
+    if (!/^(github_pat_|ghp_)/.test(t)) return msg('c-msg', 'Eso no parece un token: debe empezar por github_pat_. Cópialo otra vez desde GitHub.', true);
+    if (t.startsWith('github_pat_') && t.length < 80) return msg('c-msg', 'El token parece incompleto (' + t.length + ' caracteres; debería tener unos 93). Cópialo otra vez completo.', true);
     busy(true); msg('c-msg', 'Probando el token…');
     try {
       const file = await gh.read('data/movimientos.csv', t);
       gh.setToken(t); raw.movimientos = parseCSV(file.text); refresh();
       openSheet(f.editing); toast('Conectado con GitHub');
     } catch (e) {
-      msg('c-msg', e.status === 401 ? 'GitHub no reconoce ese token. Cópialo otra vez.' : e.status === 403 || e.status === 404 ? 'El token no tiene acceso a finanzas-verano-2027.' : 'No se pudo probar el token. Revisa tu conexión.', true);
+      msg('c-msg', e.status === 401 ? 'GitHub no reconoce ese token. Revisa que esté completo (empieza por github_pat_) o crea uno nuevo.' : e.status === 403 || e.status === 404 ? 'El token no tiene acceso a finanzas-verano-2027.' : 'No se pudo probar el token. Revisa tu conexión.', true);
     } finally { busy(false); }
   }
 
