@@ -19,11 +19,11 @@
 <style>
 /* Candado mínimo en línea: funciona aunque el navegador tenga guardada una versión vieja de styles.css */
 html.locked body > :not(.lock) { display: none !important; }
-html.locked .lock { display: grid !important; place-items: center; position: fixed; inset: 0; z-index: 100; }
+html.locked .lock { display: flex !important; flex-direction: column; overflow-y: auto; position: fixed; inset: 0; z-index: 100; }
 .lock { display: none; }
 </style>
 <link rel="stylesheet" href="styles.css?v=20261113b">
-<script src="lock.js?v=20261113a"></script>
+<script src="lock.js?v=20261113b"></script>
 </head>
 <body>
 <div class="lock" id="lock" role="dialog" aria-modal="true" aria-labelledby="lock-title">
@@ -64,7 +64,7 @@ html.locked .lock { display: grid !important; place-items: center; position: fix
     <div class="balance">
       <div class="bal-top">
         <span class="bal-label">Ahorro para Nueva York</span>
-        <div class="seg" role="group" aria-label="Moneda">
+        <div class="cur" role="group" aria-label="Moneda">
           <button type="button" data-cur="cop" aria-pressed="true">COP</button>
           <button type="button" data-cur="usd" aria-pressed="false">USD</button>
         </div>

@@ -132,7 +132,7 @@
     setText('bal-amount', enUsd ? usd(usdAhorro) : cop(t.ahorrado_cop));
     setText('bal-other', enUsd ? cop(t.ahorrado_cop) : '≈ ' + usd(usdAhorro));
     setText('bal-meta', enUsd ? usd(usdMeta) : cop(t.meta_cop));
-    document.querySelectorAll('.seg [data-cur]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.cur === state.cur)));
+    document.querySelectorAll('.cur [data-cur]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.cur === state.cur)));
     ['a-ahorro'].forEach((id) => setText(id, cop(t.ahorrado_cop)));
     setText('a-meta', cop(t.meta_cop));
     setText('v-avance', pct(t.avance)); setText('a-avance', pct(t.avance));
@@ -364,7 +364,7 @@
   window.addEventListener('hashchange', () => show(current()));
   document.querySelectorAll('a[data-bolsa]').forEach((a) => a.addEventListener('click', () => { state.bolsa = a.dataset.bolsa; if (state.data) renderBolsa(); }));
   document.querySelectorAll('#chips-mov .chip').forEach((c) => c.addEventListener('click', () => { state.filtro = c.dataset.f; renderMovimientos(); }));
-  document.querySelectorAll('.seg [data-cur]').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll('.cur [data-cur]').forEach((b) => b.addEventListener('click', () => {
     state.cur = b.dataset.cur; try { localStorage.setItem('nyc-cur', state.cur); } catch (e) {}
     if (state.data) renderResumen(state.data.t);
   }));

@@ -396,9 +396,9 @@ body::before { background: var(--bg); }
 }
 .bal-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .bal-label { color: var(--muted); font-size: 14px; font-weight: 500; }
-.seg { display: inline-flex; padding: 3px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); }
-.seg button { font: 600 12px var(--f-body); letter-spacing: .04em; color: var(--muted); background: none; border: 0; padding: 6px 12px; border-radius: 999px; cursor: pointer; }
-.seg button[aria-pressed="true"] { background: var(--lime); color: #0a0b0e; }
+.cur { display: inline-flex; padding: 3px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); }
+.cur button { font: 600 12px var(--f-body); letter-spacing: .04em; color: var(--muted); background: none; border: 0; padding: 6px 12px; border-radius: 999px; cursor: pointer; transition: background .2s, color .2s; }
+.cur button[aria-pressed="true"] { background: var(--lime); color: #0a0b0e; }
 .bal-amount { font-family: var(--f-display); font-weight: 800; font-size: clamp(40px, 11vw, 60px); letter-spacing: -.03em; line-height: 1.02; font-variant-numeric: tabular-nums; }
 .bal-sub { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
 .fz-meter.big { height: 8px; --c: var(--lime); background: color-mix(in srgb, var(--lime) 14%, transparent); }
@@ -465,6 +465,37 @@ html.locked .lock { background: radial-gradient(90% 60% at 50% 0%, color-mix(in 
   .fz-big { font-size: 22px; }
   .balance { padding: 20px 18px; }
 }
-.btn.primary { background: var(--lime); color: #0a0b0e; border-color: var(--lime); }
 .nav-add i, .add-btn { background: var(--lime) !important; color: #0a0b0e !important; }
 .sheet { background: var(--panel); color: var(--fg); border-color: var(--line); }
+
+#c-guardar.btn.primary { background: var(--lime); color: #0a0b0e; }
+
+/* Gasto / Ahorro como interruptor deslizante */
+.seg-tipo { position: relative; padding: 4px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); gap: 0; }
+.seg-tipo::before {
+  content: ""; position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 999px;
+  background: var(--coral); box-shadow: 0 4px 14px -6px color-mix(in srgb, var(--coral) 80%, transparent);
+  transition: transform .28s cubic-bezier(.2, .8, .2, 1), background .28s, box-shadow .28s;
+}
+.seg-tipo:has(input[value="ahorro"]:checked)::before { transform: translateX(100%); background: var(--mint); box-shadow: 0 4px 14px -6px color-mix(in srgb, var(--mint) 80%, transparent); }
+.seg-tipo label { z-index: 1; }
+.seg-tipo span { padding: 11px 12px; border-radius: 999px; font-size: 15px; background: none !important; box-shadow: none !important; }
+.seg-tipo input:checked + span { color: #0a0b0e !important; }
+.seg-sm { padding: 3px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); }
+.seg-sm span { border-radius: 999px; }
+.seg-sm input:checked + span { background: var(--lime); color: #0a0b0e; box-shadow: none; }
+
+/* Pantalla de clave: nunca se corta arriba en pantallas bajas */
+html.locked .lock { display: flex !important; flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.lock-card { margin: auto; }
+@media (max-height: 760px) {
+  .lock-card img { width: 52px; height: 52px; }
+  .lock-card h1 { font-size: 28px; margin-top: 6px; }
+  .pin-dots { margin: 12px 0 2px; }
+  .keypad { grid-template-columns: repeat(3, 64px); gap: 10px 20px; }
+  .keypad button { width: 64px; height: 64px; font-size: 25px; }
+}
+@media (max-height: 620px) {
+  .keypad { grid-template-columns: repeat(3, 56px); gap: 8px 18px; }
+  .keypad button { width: 56px; height: 56px; font-size: 22px; }
+}
