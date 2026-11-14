@@ -3,3 +3,4 @@ id,fecha,tipo,grupo,concepto,detalle,moneda,monto,usd,cop
 2,2026-11-12,gasto,Programa,Inscripción y entrevista de inglés,Pago a SEI,COP,150000,45.49,150000
 3,2026-11-12,gasto,Programa,Abono para separar el cupo,Pago a SEI,COP,1200000,363.96,1200000
 4,2026-11-12,ahorro,Ahorro,Ahorro,Ahorro en dólares,USD,60,60,197824
+5,2026-11-13,gasto,Préstamo,Saldo del programa Premium,,USD,1625,1625,5365604
