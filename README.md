@@ -11,7 +11,7 @@ Cuatro secciones, con pestañas arriba en el computador y una barra abajo en el 
 - **Ahorro para Nueva York** frente a la meta y frente al plan a la fecha de hoy.
 - **Colchón**: arranca en US$0 y crece con cada almuerzo invitado (en el formulario: Ahorro → Va para → Colchón · almuerzo invitado), menos lo que te pases en Nueva York o en el sueldo. No cuenta como ahorro para Nueva York.
 - **Tres bolsas separadas**:
-  - **Préstamo · Cedar Point**: programa, visa, tren y los primeros US$800 de los vuelos. Lo usado es lo que se devuelve.
+  - **Préstamo · Cedar Point**: programa, visa, tren y los primeros US$800 de los vuelos. Lo usado es lo que se devuelve, y se cuenta en pesos (lo que costó el día del pago): no cambia con el dólar.
   - **Tu plata · Nueva York**: lo que pasa de US$800 en vuelos, hotel, comida, metro, Estatua de la Libertad, AirTrain e iPhone.
   - **Sueldo en Cedar Point**: vivienda, mercado y almuerzo.
 - **Movimientos**: cada gasto o ahorro registrado.
@@ -28,7 +28,7 @@ lock.js             pantalla de clave
 data/
   movimientos.csv   gastos y ahorros (aquí se agrega cada movimiento)
   presupuesto.csv   presupuesto por concepto y bolsa
-  plan.csv          metas de ahorro acumulado
+  plan.csv          metas de ahorro acumulado, en dólares (US$800 a fin de 2026, US$1.600 a junio de 2027)
   parametros.csv    tasa de cambio del día y ahorro por almuerzos invitados
   ruta.json         plan de los días en Nueva York
 .nojekyll           le dice a GitHub Pages que publique los archivos tal cual

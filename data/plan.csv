@@ -1,4 +1,4 @@
-fecha,meta_acumulada_cop,hito
-2026-11-11,2110125,Ahorro inicial (US$640)
-2026-12-31,2710125,+ $600.000 a fin de 2026
-2027-06-30,5310125,+ $2.600.000 en el primer semestre
+fecha,meta_acumulada_usd,hito
+2026-11-11,640,Ahorro inicial (US$640)
+2026-12-31,800,Llegar a US$800 a fin de 2026
+2027-06-30,1600,+ US$800 en el primer semestre de 2027

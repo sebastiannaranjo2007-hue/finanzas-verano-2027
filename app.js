@@ -46,8 +46,11 @@
   // Reparte el gasto de cada cuenta entre sus conceptos en orden:
   // en los vuelos, los primeros US$800 van al préstamo y el resto a Nueva York.
   function porConcepto(presupuesto, movimientos) {
-    const porCuenta = new Map();
-    movimientos.filter((m) => m.tipo === 'gasto').forEach((m) => porCuenta.set(m.concepto, (porCuenta.get(m.concepto) || 0) + n(m.usd)));
+    const porCuenta = new Map(), copCuenta = new Map();
+    movimientos.filter((m) => m.tipo === 'gasto').forEach((m) => {
+      porCuenta.set(m.concepto, (porCuenta.get(m.concepto) || 0) + n(m.usd));
+      copCuenta.set(m.concepto, (copCuenta.get(m.concepto) || 0) + n(m.cop));
+    });
     const filas = presupuesto.map((p) => ({bolsa: p.bolsa, orden: n(p.orden), concepto: p.concepto, cuenta: p.cuenta || p.concepto, presupuesto_usd: n(p.presupuesto_usd), nota: p.nota || ''}))
       .sort((a, b) => a.orden - b.orden);
     porCuenta.forEach((v, c) => { if (!filas.some((f) => f.cuenta === c)) filas.push({bolsa: 'Nueva York', orden: 999, concepto: c, cuenta: c, presupuesto_usd: 0, nota: 'Sin presupuesto: sale del colchón'}); });
@@ -60,19 +63,21 @@
       const sobre = Math.max(0, r2(g - f.presupuesto_usd));
       let estado = 'Pendiente';
       if (g > 0) estado = f.presupuesto_usd === 0 ? 'Del colchón' : (sobre > 0 ? 'Te pasaste' : (g >= f.presupuesto_usd ? 'Pagado' : 'En curso'));
-      return {...f, gastado_usd: g, restante_usd: r2(f.presupuesto_usd - g), sobrecosto_usd: sobre, estado};
+      // pesos que costó (con la TRM del día en que se pagó): eso es lo que se debe, no cambia con el dólar
+      const tot = porCuenta.get(f.cuenta) || 0, gastado_cop = tot ? Math.round(g / tot * (copCuenta.get(f.cuenta) || 0)) : 0;
+      return {...f, gastado_usd: g, gastado_cop, restante_usd: r2(f.presupuesto_usd - g), sobrecosto_usd: sobre, estado};
     });
   }
 
   // Colchón: arranca en US$0 y crece con cada almuerzo invitado (no es ahorro para Nueva York)
   const esColchon = (m) => m.tipo === 'ahorro' && m.grupo === 'Colchón';
   const esAhorroNyc = (m) => m.tipo === 'ahorro' && m.grupo !== 'Colchón';
-  // El ahorro se guarda en dólares: lo que vale en pesos se calcula siempre con la TRM de hoy
-  function serieAhorro(movimientos, tasa) {
+  // El ahorro y la meta van en dólares; en pesos se muestran con la TRM de hoy
+  function serieAhorro(movimientos) {
     const porDia = new Map();
-    movimientos.filter(esAhorroNyc).forEach((m) => porDia.set(m.fecha, (porDia.get(m.fecha) || 0) + n(m.usd) * tasa));
+    movimientos.filter(esAhorroNyc).forEach((m) => porDia.set(m.fecha, (porDia.get(m.fecha) || 0) + n(m.usd)));
     let acc = 0;
-    return [...porDia.keys()].sort().map((fecha) => { acc += porDia.get(fecha); return {fecha, acumulado_cop: Math.round(acc)}; });
+    return [...porDia.keys()].sort().map((fecha) => { acc += porDia.get(fecha); return {fecha, acumulado_usd: r2(acc)}; });
   }
 
   function totales(filas, movimientos, plan, parametros) {
@@ -80,7 +85,7 @@
     const ahorrado_usd = r2(ahorros.reduce((s, m) => s + n(m.usd), 0));
     const tasa = n((parametros[0] || {}).tasa_cop_usd);
     const ahorrado_cop = Math.round(ahorrado_usd * tasa);
-    const hitos = plan.map((p) => ({t: toTime(p.fecha), v: n(p.meta_acumulada_cop)})).sort((a, b) => a.t - b.t);
+    const hitos = plan.map((p) => ({t: toTime(p.fecha), v: n(p.meta_acumulada_usd)})).sort((a, b) => a.t - b.t);
     const hoy = Date.now();
     let esperado = hitos.length ? hitos[0].v : 0;
     for (let i = 1; i < hitos.length; i++) {
@@ -88,7 +93,7 @@
       if (hoy >= b.t) esperado = b.v;
       else if (hoy > a.t) { esperado = a.v + (b.v - a.v) * (hoy - a.t) / (b.t - a.t); break; }
     }
-    const meta_cop = hitos.length ? hitos[hitos.length - 1].v : 0;
+    const meta_usd = hitos.length ? hitos[hitos.length - 1].v : 0;
     const p0 = parametros[0] || {};
     const suma = (bolsa, campo) => r2(filas.filter((f) => f.bolsa === bolsa).reduce((s, f) => s + n(f[campo]), 0));
     const presupuesto_nyc = suma('Nueva York', 'presupuesto_usd');
@@ -97,12 +102,12 @@
     const fondo_meta = n(p0.ahorro_almuerzos_usd);
     const fondo_usado = r2(suma('Nueva York', 'sobrecosto_usd') + suma('Sueldo en Cedar Point', 'sobrecosto_usd'));
     return {
-      tasa, fecha_tasa: p0.fecha_tasa, ahorrado_usd, ahorrado_cop, meta_cop,
-      avance: meta_cop ? ahorrado_cop / meta_cop : 0,
-      esperado: Math.round(esperado), dif: Math.round(ahorrado_cop - esperado),
+      tasa, fecha_tasa: p0.fecha_tasa, ahorrado_usd, ahorrado_cop, meta_usd,
+      avance: meta_usd ? ahorrado_usd / meta_usd : 0,
+      esperado: r2(esperado), dif: r2(ahorrado_usd - esperado),
       fondo_inicial, fondo_meta, fondo_usado, fondo_restante: r2(fondo_inicial - fondo_usado),
       presupuesto_nyc, gastado_nyc: suma('Nueva York', 'gastado_usd'),
-      presupuesto_papa: suma('Préstamo', 'presupuesto_usd'), gastado_papa: suma('Préstamo', 'gastado_usd')
+      presupuesto_papa: suma('Préstamo', 'presupuesto_usd'), gastado_papa: suma('Préstamo', 'gastado_usd'), deuda_cop: Math.round(suma('Préstamo', 'gastado_cop'))
     };
   }
 
@@ -133,19 +138,20 @@
   function renderResumen(t) {
     setText('v-tasa', t.tasa.toLocaleString('es-CO', {minimumFractionDigits: 2}));
     setText('v-tasa-fecha', t.fecha_tasa ? fDate(t.fecha_tasa) : '—');
-    const usdAhorro = t.ahorrado_usd, usdMeta = t.tasa ? t.meta_cop / t.tasa : 0;
+    const usdAhorro = t.ahorrado_usd;
     const enUsd = state.cur === 'usd';
     setText('bal-amount', enUsd ? usd(usdAhorro) : cop(t.ahorrado_cop));
     document.querySelectorAll('.cur [data-cur]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.cur === state.cur)));
-    ['a-ahorro'].forEach((id) => setText(id, cop(t.ahorrado_cop)));
-    setText('a-meta', cop(t.meta_cop));
+    setText('a-ahorro', usd(t.ahorrado_usd));
+    setText('a-meta', usd(t.meta_usd));
     setText('v-avance', pct(t.avance)); setText('a-avance', pct(t.avance));
     const d = $('v-dif');
-    if (d) { d.textContent = (t.dif > 0 ? '▲ +' : t.dif < 0 ? '▼ ' : '') + (enUsd && t.tasa ? usd(t.dif / t.tasa) : cop(t.dif)); d.className = 'delta ' + (t.dif >= 0 ? 'up' : 'down'); }
-    setText('v-esperado', cop(t.esperado));
+    if (d) { d.textContent = (t.dif > 0 ? '▲ +' : t.dif < 0 ? '▼ ' : '') + (enUsd ? usd(t.dif) : cop(t.dif * t.tasa)); d.className = 'delta ' + (t.dif >= 0 ? 'up' : 'down'); }
+    setText('v-esperado', usd(t.esperado));
     setText('v-fondo', usd(t.fondo_restante)); setText('v-fondo-meta', usd(t.fondo_meta));
     setText('v-gastado-nyc', usd(t.gastado_nyc)); setText('v-pres-nyc', usd(t.presupuesto_nyc));
-    setText('v-deuda', usd(t.gastado_papa)); setText('v-pres-papa', usd(t.presupuesto_papa));
+    setText('v-deuda', t.deuda_cop >= 1e6 ? '$' + (t.deuda_cop / 1e6).toLocaleString('es-CO', {maximumFractionDigits: 2}) + ' M' : cop(t.deuda_cop));
+    const vd = $('v-deuda'); if (vd) vd.title = cop(t.deuda_cop); setText('v-pres-papa', usd(t.presupuesto_papa));
   }
   function animateMeters(view) {
     const t = state.data && state.data.t; if (!t) return;
@@ -194,12 +200,12 @@
   function renderHitos(plan, t) {
     const box = $('l-hitos'); box.replaceChildren();
     plan.slice().sort((a, b) => a.fecha.localeCompare(b.fecha)).forEach((p, i) => {
-      const meta = n(p.meta_acumulada_cop), ok = t.ahorrado_cop >= meta;
+      const meta = n(p.meta_acumulada_usd), ok = t.ahorrado_usd >= meta;
       const card = el('div', 'item pop' + (ok ? ' done' : '')); card.style.animationDelay = i * 40 + 'ms';
       const tt = el('div', 'it-title', p.hito); tt.appendChild(el('span', 'it-sub', 'Para el ' + fDate(p.fecha))); card.appendChild(tt);
       const side = el('div', 'it-side'); side.appendChild(el('span', 'fz-pill ' + (ok ? 'ok' : ''), ok ? 'Cumplida' : 'Pendiente')); card.appendChild(side);
-      const s1 = el('div', 'it-stat'); s1.appendChild(el('small', null, 'Meta acumulada')); s1.appendChild(document.createTextNode(cop(meta))); card.appendChild(s1);
-      const s2 = el('div', 'it-stat ' + (ok ? 'pos' : '')); s2.appendChild(el('small', null, ok ? 'Superada por' : 'Te falta')); s2.appendChild(document.createTextNode(cop(Math.abs(meta - t.ahorrado_cop)))); card.appendChild(s2);
+      const s1 = el('div', 'it-stat'); s1.appendChild(el('small', null, 'Meta acumulada')); s1.appendChild(document.createTextNode(usd(meta))); card.appendChild(s1);
+      const s2 = el('div', 'it-stat ' + (ok ? 'pos' : '')); s2.appendChild(el('small', null, ok ? 'Superada por' : 'Te falta')); s2.appendChild(document.createTextNode(usd(Math.abs(meta - t.ahorrado_usd)))); card.appendChild(s2);
       box.appendChild(card);
     });
   }
@@ -223,7 +229,7 @@
     const fs = filas.filter((f) => f.bolsa === b);
     const pres = fs.reduce((s, f) => s + f.presupuesto_usd, 0), gas = fs.reduce((s, f) => s + f.gastado_usd, 0);
     const card = $('bolsa-resumen'); card.style.setProperty('--c', COLOR[b]);
-    setText('b-titulo', TITULO[b]); setText('b-gastado', usd(gas)); setText('b-presupuesto', usd(pres)); setText('b-queda', usd(pres - gas)); setText('b-nota', NOTA[b] || '');
+    setText('b-titulo', TITULO[b]); setText('b-gastado', usd(gas)); setText('b-presupuesto', usd(pres)); setText('b-queda', usd(pres - gas)); setText('b-nota', (NOTA[b] || '') + (b === 'Préstamo' ? ' Llevas ' + cop(Math.round(fs.reduce((s, f) => s + (f.gastado_cop || 0), 0))) + ' en pesos: eso es lo que debes, y no cambia con el dólar.' : ''));
     meter('b-meter', pres ? gas / pres : 0);
     const box = $('l-presupuesto'); box.replaceChildren();
     fs.forEach((f, i) => {
@@ -245,19 +251,19 @@
   function renderChart(serie, plan) {
     const box = $('chart'); box.replaceChildren();
     const W = Math.max(280, box.clientWidth || 600), H = 260, m = {t: 18, r: 18, b: 30, l: 58};
-    const real = serie.map((d) => ({t: toTime(d.fecha), v: d.acumulado_cop, fecha: d.fecha}));
-    const pl = plan.map((d) => ({t: toTime(d.fecha), v: n(d.meta_acumulada_cop), fecha: d.fecha, hito: d.hito}));
+    const real = serie.map((d) => ({t: toTime(d.fecha), v: d.acumulado_usd, fecha: d.fecha}));
+    const pl = plan.map((d) => ({t: toTime(d.fecha), v: n(d.meta_acumulada_usd), fecha: d.fecha, hito: d.hito}));
     const all = real.concat(pl); if (!all.length) return;
     const DAY = 864e5;
     const t0 = Math.min(...all.map((d) => d.t)) - 7 * DAY, t1 = Math.max(...all.map((d) => d.t)) + 7 * DAY;
     const maxV = Math.max(...all.map((d) => d.v)) * 1.06; const step = niceStep(maxV / 4); const yMax = Math.ceil(maxV / step) * step;
     const x = (t) => m.l + (t - t0) / (t1 - t0) * (W - m.l - m.r);
     const y = (v) => H - m.b - v / yMax * (H - m.t - m.b);
-    const svg = svgEl('svg', {viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Ahorro acumulado en pesos frente al plan de ahorro'}, box);
+    const svg = svgEl('svg', {viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': 'Ahorro acumulado en dólares frente al plan de ahorro'}, box);
     for (let v = 0; v <= yMax + 1; v += step) {
       svgEl('line', {x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), class: 'grid'}, svg);
       const tx = svgEl('text', {x: m.l - 8, y: y(v) + 4, 'text-anchor': 'end', class: 'axis'}, svg);
-      tx.textContent = '$' + (v / 1e6).toLocaleString('es-CO', {maximumFractionDigits: 1}) + ' M';
+      tx.textContent = 'US$' + Math.round(v).toLocaleString('es-CO');
     }
     const months = []; const s = new Date(t0); let d = Date.UTC(s.getUTCFullYear(), s.getUTCMonth() + 1, 1);
     while (d <= t1) { months.push(d); const dd = new Date(d); d = Date.UTC(dd.getUTCFullYear(), dd.getUTCMonth() + 1, 1); }
@@ -277,10 +283,10 @@
       svgEl('path', {d: area, fill: 'color-mix(in srgb, var(--lime) 16%, transparent)'}, svg);
       svgEl('path', {d: line, fill: 'none', stroke: 'var(--lime)', 'stroke-width': 3}, svg);
       const last = real[real.length - 1];
-      const lt = svgEl('text', {x: x(last.t) + 8, y: y(last.v) + 18, class: 'axis', fill: 'var(--lime)'}, svg); lt.textContent = cop(last.v); lt.style.fill = 'var(--lime)';
+      const lt = svgEl('text', {x: x(last.t) + 8, y: y(last.v) + 18, class: 'axis', fill: 'var(--lime)'}, svg); lt.textContent = usd(last.v); lt.style.fill = 'var(--lime)';
     }
     const goal = pl[pl.length - 1];
-    if (goal) { const gt = svgEl('text', {x: x(goal.t), y: y(goal.v) - 10, 'text-anchor': 'end', class: 'axis'}, svg); gt.textContent = 'Meta ' + cop(goal.v); }
+    if (goal) { const gt = svgEl('text', {x: x(goal.t), y: y(goal.v) - 10, 'text-anchor': 'end', class: 'axis'}, svg); gt.textContent = 'Meta ' + usd(goal.v); }
 
     const tip = el('div', 'fz-tip'); tip.hidden = true; box.appendChild(tip);
     const show = (ev, lines) => {
@@ -293,12 +299,12 @@
     const hide = () => { tip.hidden = true; };
     pl.forEach((p) => {
       const c = svgEl('circle', {cx: x(p.t), cy: y(p.v), r: 5, fill: 'var(--panel)', stroke: 'var(--sky)', 'stroke-width': 2}, svg);
-      c.addEventListener('pointerenter', (e) => show(e, [['Plan', fDate(p.fecha)], ['Meta acumulada', cop(p.v)], ['', p.hito]]));
+      c.addEventListener('pointerenter', (e) => show(e, [['Plan', fDate(p.fecha)], ['Meta acumulada', usd(p.v)], ['', p.hito]]));
       c.addEventListener('pointerleave', hide);
     });
     real.forEach((p) => {
       const c = svgEl('circle', {cx: x(p.t), cy: y(p.v), r: 6, fill: 'var(--lime)', stroke: 'var(--panel)', 'stroke-width': 2}, svg);
-      c.addEventListener('pointerenter', (e) => show(e, [['Ahorrado al', fDate(p.fecha)], ['Acumulado', cop(p.v)]]));
+      c.addEventListener('pointerenter', (e) => show(e, [['Ahorrado al', fDate(p.fecha)], ['Acumulado', usd(p.v)]]));
       c.addEventListener('pointerleave', hide);
     });
   }
@@ -610,7 +616,7 @@
   function refresh() {
     const {presupuesto, movimientos, plan, parametros} = raw;
     const filas = porConcepto(presupuesto, movimientos);
-    const serie = serieAhorro(movimientos, n((parametros[0] || {}).tasa_cop_usd));
+    const serie = serieAhorro(movimientos);
     const t = totales(filas, movimientos, plan, parametros);
     state.data = {filas, serie, plan, movimientos, t};
     renderResumen(t);
